@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Premium</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (!localStorage.getItem('token')) {
+                window.location.href = '/login';
+            } else {
+                document.getElementById('adminBody').style.display = 'flex';
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* Primary Backgrounds - AIT Dark Theme */
+            --bg-dark: #0B0E14;
+            --bg-light: #161B22;
+            --bg-lighter: #1C2128;
+            --bg-elevated: #21262D;
+
+            /* Accent Colors - Teal/Cyan Brand */
+            --accent: #2DD4BF;
+            --accent-hover: #34E6D2;
+            --accent-tint: rgba(45, 212, 191, 0.12);
+            --accent-glow: 0 0 20px rgba(45, 212, 191, 0.2);
+            --gradient-primary: linear-gradient(135deg, #2DD4BF 0%, #38BDF8 100%);
+
+            /* Text Colors */
+            --text-main: #E2E8F0;
+            --text-slate: #94A3B8;
+            --text-lightest: #F8FAFC;
+            --text-muted: #64748B;
+
+            /* Borders */
+            --border: #30363D;
+            --border-light: #21262D;
+
+            /* Status Colors */
+            --danger: #EF4444;
+            --success: #10B981;
+            --warning: #F59E0B;
+
+            /* Transitions */
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, var(--bg-light) 0%, var(--bg-dark) 100%);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1.5rem;
+            flex-shrink: 0;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar h2 {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.5rem;
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            filter: drop-shadow(var(--accent-glow));
+        }
+
+        .sidebar h2::before {
+            content: '{ }';
+            font-family: 'Fira Code', monospace;
+            font-size: 1.2rem;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            color: var(--text-slate);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-item:hover {
+            color: var(--accent);
+            background: var(--bg-lighter);
+        }
+
+        .nav-item.active {
+            background-color: var(--accent-tint);
+            color: var(--accent);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 3rem;
+            position: relative;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .section {
+            display: none;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        header {
+            margin-bottom: 2.5rem;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            color: var(--text-lightest);
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: var(--text-slate);
+        }
+
+        /* --- Cards & Forms --- */
+        .card {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--gradient-primary);
+            opacity: 0.5;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-main);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border);
+            color: var(--text-lightest);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-tint);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--accent-glow), 0 8px 25px rgba(45, 212, 191, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-outline:hover {
+            background: var(--accent-tint);
+        }
+
+        .btn-danger {
+            background: rgba(248, 81, 73, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* --- List Items --- */
+        .item-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .list-item {
+            background: var(--bg-lighter);
+            padding: 1.25rem;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid transparent;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .list-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            padding: 1px;
+            background: var(--gradient-primary);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .list-item:hover::before {
+            opacity: 1;
+        }
+
+        .list-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--accent-glow), 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .list-item-info h3 {
+            font-size: 1.1rem;
+            color: var(--text-lightest);
+            margin-bottom: 4px;
+        }
+
+        .list-item-info p {
+            color: var(--text-slate);
+            font-size: 0.85rem;
+        }
+
+        /* --- Upload Component --- */
+        .upload-area {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .upload-preview {
+            width: 100px;
+            height: 60px;
+            border-radius: 6px;
+            background: var(--bg-dark);
+            border: 1px dashed var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .upload-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* --- Toast Notifications --- */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            background: var(--bg-light);
+            border-left: 4px solid var(--accent);
+            color: var(--text-lightest);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transform: translateY(100px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        #toast.show {
+            transform: translateY(0);
+        }
+
+        /* Icons (SVG placeholders) */
+        .icon {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+    </style>
+</head>
+
+<body style="display: none;" id="adminBody">
+
+    <aside class="sidebar">
+        <h2>Jaber Core</h2>
+        <div class="nav-items">
+            <div class="nav-item active" onclick="showSection('profile')">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path
+                        d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                </svg>
+                Identity
+            </div>
+            <div class="nav-item" onclick="showSection('experience')">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path
+                        d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z" />
+                </svg>
+                Experience
+            </div>
+            <div class="nav-item" onclick="showSection('projects')">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
+                </svg>
+                Projects
+            </div>
+            <div class="nav-item" onclick="showSection('writing')">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path
+                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                </svg>
+                Journal
+            </div>
+            <div class="nav-item" onclick="showSection('achievements')">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path
+                        d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM7 8c0-1.66 1.34-3 3-3v3c-1.66 0-3-1.34-3-3zm10 0c-1.66 0-3-1.34-3-3v3c1.66 0 3-1.34 3-3z" />
+                </svg>
+                Achievements
+            </div>
+            <div class="nav-item" onclick="showSection('photos')">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path
+                        d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                </svg>
+                Photos (Gallery)
+            </div>
+            <div class="nav-item" onclick="showSection('videos')">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path
+                        d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
+                </svg>
+                Videos
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <div class="nav-item" onclick="logout()">
+                <svg class="icon" viewBox="0 0 24 24" style="color: var(--danger)">
+                    <path
+                        d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z" />
+                </svg>
+                Terminate Session
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="container">
+
+            <!-- Profile Section -->
+            <div id="section-profile" class="section active">
+                <header>
+                    <h1>Identity Core</h1>
+                    <p>Manage your primary digital presence and profile metadata.</p>
+                </header>
+
+                <div class="card">
+                    <form id="profileForm" class="form-grid">
+                        <div class="form-group">
+                            <label>Display Name</label>
+                            <input type="text" id="p_name" placeholder="Mabubul Alam Jaber">
+                        </div>
+                        <div class="form-group">
+                            <label>Headline</label>
+                            <input type="text" id="p_headline" placeholder="System Engineer | TEDx Speaker">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Avatar / Profile Photo</label>
+                            <div class="upload-area">
+                                <div class="upload-preview" id="p_image_preview">
+                                    <img src="" alt="" style="display:none">
+                                    <span style="font-size: 10px; color: var(--text-slate)">No Preview</span>
+                                </div>
+                                <input type="text" id="p_image" placeholder="Image URL">
+                                <input type="file" id="p_file" style="display:none" onchange="uploadFile('p')">
+                                <button type="button" class="btn btn-outline"
+                                    onclick="document.getElementById('p_file').click()">Upload New</button>
+                            </div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Short Bio (Sidebar)</label>
+                            <textarea id="p_bio" rows="3"></textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>About Me (Detailed Narrative)</label>
+                            <textarea id="p_about" rows="6"></textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Skills (Comma separated, e.g. Go, React, Docker)</label>
+                            <input type="text" id="p_skills"
+                                placeholder="Go, Fiber, React, Node.js, PostgreSQL, Docker">
+                        </div>
+                        <div class="form-group">
+                            <label>LinkedIn</label>
+                            <input type="text" id="p_linkedin">
+                        </div>
+                        <div class="form-group">
+                            <label>GitHub</label>
+                            <input type="text" id="p_github">
+                        </div>
+                        <div class="form-group">
+                            <label>Instagram</label>
+                            <input type="text" id="p_instagram">
+                        </div>
+                        <div class="form-group">
+                            <label>Twitter (X)</label>
+                            <input type="text" id="p_twitter">
+                        </div>
+                        <div class="form-group">
+                            <label>Facebook</label>
+                            <input type="text" id="p_facebook">
+                        </div>
+                        <div class="form-group">
+                            <label>YouTube</label>
+                            <input type="text" id="p_youtube">
+                        </div>
+                        <div class="form-group">
+                            <label>Resume URL</label>
+                            <input type="text" id="p_resume">
+                        </div>
+                        <div class="form-group">
+                            <label>Primary Email</label>
+                            <input type="email" id="p_email">
+                        </div>
+
+
+                        <!-- Navigation Menu -->
+                        <h3 style="grid-column: span 2; margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent);">
+                            Navigation Menu</h3>
+                        <div class="form-group">
+                            <label>01. About</label>
+                            <input type="text" id="nav_1_label" placeholder="About">
+                        </div>
+                        <div class="form-group">
+                            <label>02. Experience</label>
+                            <input type="text" id="nav_2_label" placeholder="Experience">
+                        </div>
+                        <div class="form-group">
+                            <label>03. Work</label>
+                            <input type="text" id="nav_3_label" placeholder="Work">
+                        </div>
+                        <div class="form-group">
+                            <label>04. Contact</label>
+                            <input type="text" id="nav_4_label" placeholder="Contact">
+                        </div>
+
+                        <!-- Add More Button -->
+                        <div class="full-width" style="margin-top: 1rem;">
+                            <button type="button" class="btn btn-outline" onclick="showAddNavModal()">+ Add More Menu
+                                Items</button>
+                        </div>
+                </div>
+
+                <div class="full-width" style="text-align: right; margin-top: 1rem;">
+                    <button type="submit" class="btn btn-primary">Synchronize Identity</button>
+                </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Experience Section -->
+        <div id="section-experience" class="section">
+            <header>
+                <h1>Professional Chronology</h1>
+                <p>Update your career milestones and organizational impact.</p>
+            </header>
+
+            <div class="item-list" id="experienceList">
+                <!-- Loaded via JS -->
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <h3>Register New Role</h3>
+                <form id="experienceForm" class="form-grid" style="margin-top: 1.5rem;">
+                    <input type="hidden" id="e_id">
+                    <div class="form-group">
+                        <label>Organization</label>
+                        <input type="text" id="e_company" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Position / Role</label>
+                        <input type="text" id="e_role" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Duration Start</label>
+                        <input type="text" id="e_start" placeholder="Jan 2024">
+                    </div>
+                    <div class="form-group">
+                        <label>Duration End</label>
+                        <input type="text" id="e_end" placeholder="Present">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Core Responsibilities</label>
+                        <textarea id="e_desc" rows="3"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Stack / Technologies</label>
+                        <input type="text" id="e_tech" placeholder="Go, Kubernetes, Cloud Native">
+                    </div>
+                    <div class="full-width" style="text-align: right;">
+                        <button type="submit" class="btn btn-primary">Archive Role</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Projects Section -->
+        <div id="section-projects" class="section">
+            <header>
+                <h1>Technical Portfolio</h1>
+                <p>Showcase the products and digital artifacts you've engineered.</p>
+            </header>
+
+            <div class="item-list" id="projectsList">
+                <!-- Loaded via JS -->
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <h3>Initiate New Project</h3>
+                <form id="projectForm" class="form-grid" style="margin-top: 1.5rem;">
+                    <div class="form-group full-width">
+                        <label>Project Designation</label>
+                        <input type="text" id="pr_title" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Visual Identity (Cover Photo)</label>
+                        <div class="upload-area">
+                            <div class="upload-preview" id="pr_image_preview">
+                                <img src="" alt="" style="display:none">
+                                <span style="font-size: 10px; color: var(--text-slate)">No Preview</span>
+                            </div>
+                            <input type="text" id="pr_image" placeholder="Image URL">
+                            <input type="file" id="pr_file" style="display:none" onchange="uploadFile('pr')">
+                            <button type="button" class="btn btn-outline"
+                                onclick="document.getElementById('pr_file').click()">Upload Graphic</button>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Project Narrative</label>
+                        <textarea id="pr_content" rows="4" required
+                            placeholder="Describe the problem, solution, and impact..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Classification / Tags</label>
+                        <input type="text" id="pr_category" placeholder="React, MySQL, AWS">
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: center; gap: 10px; padding-top: 30px;">
+                        <input type="checkbox" id="pr_featured" style="width: 20px; height: 20px; cursor: pointer;">
+                        <label style="margin: 0; cursor: pointer;" for="pr_featured">Prioritize in Spotlight</label>
+                    </div>
+                    <div class="full-width" style="text-align: right;">
+                        <button type="submit" class="btn btn-primary">Deploy Project</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Writing Section -->
+        <div id="section-writing" class="section">
+            <header>
+                <h1>Technical Journal</h1>
+                <p>Curate your thoughts, tutorials and technical documentation.</p>
+            </header>
+
+            <div class="item-list" id="writingList">
+                <!-- Loaded via JS -->
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <h3>Publish New Article</h3>
+                <form id="writingForm" class="form-grid" style="margin-top: 1.5rem;">
+                    <div class="form-group full-width">
+                        <label>Headline</label>
+                        <input type="text" id="wr_title" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Feature Graphic</label>
+                        <div class="upload-area">
+                            <div class="upload-preview" id="wr_image_preview">
+                                <img src="" alt="" style="display:none">
+                                <span style="font-size: 10px; color: var(--text-slate)">No Preview</span>
+                            </div>
+                            <input type="text" id="wr_image" placeholder="Image URL">
+                            <input type="file" id="wr_file" style="display:none" onchange="uploadFile('wr')">
+                            <button type="button" class="btn btn-outline"
+                                onclick="document.getElementById('wr_file').click()">Upload</button>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Manuscript / Body</label>
+                        <textarea id="wr_content" rows="10" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Tags</label>
+                        <input type="text" id="wr_category" placeholder="Tutorial, Engineering">
+                    </div>
+                    <div class="full-width" style="text-align: right;">
+                        <button type="submit" class="btn btn-primary">Publish Entry</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        </div>
+        <!-- Achievement Section -->
+        <div id="section-achievements" class="section">
+            <header>
+                <h1>Achievements & Awards</h1>
+                <p>Highlight your honors, certifications, and milestones.</p>
+            </header>
+
+            <div class="item-list" id="achievementList">
+                <!-- Loaded via JS -->
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <h3>Add New Achievement</h3>
+                <form id="achievementForm" class="form-grid" style="margin-top: 1.5rem;">
+                    <div class="form-group full-width">
+                        <label>Title</label>
+                        <input type="text" id="ach_title" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date / Year</label>
+                        <input type="text" id="ach_date" placeholder="2024">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Description</label>
+                        <textarea id="ach_desc" rows="3"></textarea>
+                    </div>
+                    <div class="full-width" style="text-align: right;">
+                        <button type="submit" class="btn btn-primary">Add Achievement</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Photos Section -->
+        <div id="section-photos" class="section">
+            <header>
+                <h1>Photo Gallery</h1>
+                <p>Curate images for your portfolio gallery.</p>
+            </header>
+
+            <div class="item-list"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;"
+                id="photoList">
+                <!-- Loaded via JS -->
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <h3>Upload New Photo</h3>
+                <form id="photoForm" class="form-grid" style="margin-top: 1.5rem;">
+                    <div class="form-group full-width">
+                        <label>Photo</label>
+                        <div class="upload-area">
+                            <div class="upload-preview" id="ph_image_preview">
+                                <img src="" alt="" style="display:none">
+                                <span style="font-size: 10px; color: var(--text-slate)">No Preview</span>
+                            </div>
+                            <input type="text" id="ph_image" placeholder="Image URL" required>
+                            <input type="file" id="ph_file" style="display:none" onchange="uploadFile('ph')">
+                            <button type="button" class="btn btn-outline"
+                                onclick="document.getElementById('ph_file').click()">Upload</button>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Caption (Optional)</label>
+                        <input type="text" id="ph_caption">
+                    </div>
+                    <div class="full-width" style="text-align: right;">
+                        <button type="submit" class="btn btn-primary">Add Photo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Videos Section -->
+        <div id="section-videos" class="section">
+            <header>
+                <h1>Video Gallery</h1>
+                <p>Manage your featured YouTube videos.</p>
+            </header>
+
+            <div class="item-list" id="videoList">
+                <!-- Loaded via JS -->
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <h3>Embed New Video</h3>
+                <form id="videoForm" class="form-grid" style="margin-top: 1.5rem;">
+                    <div class="form-group full-width">
+                        <label>Video Title</label>
+                        <input type="text" id="vid_title" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>YouTube Link (URL or ID)</label>
+                        <input type="text" id="vid_link" placeholder="https://www.youtube.com/watch?v=..." required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Description</label>
+                        <textarea id="vid_desc" rows="2"></textarea>
+                    </div>
+                    <div class="full-width" style="text-align: right;">
+                        <button type="submit" class="btn btn-primary">Add Video</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="toast">Changes synchronized successfully!</div>
+
+    <script>
+        const API = '/api';
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.getElementById('section-' + id).classList.add('active');
+
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            if (id === 'profile') { loadProfile(); loadNavItems(); }
+            if (id === 'experience') loadExperience();
+            if (id === 'projects') loadProjects();
+            if (id === 'writing') loadWriting();
+            if (id === 'achievements') loadAchievements();
+            if (id === 'photos') loadPhotos();
+            if (id === 'videos') loadVideos();
+        }
+
+        function toast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        async function uploadFile(prefix) {
+            const fileInput = document.getElementById(prefix + '_file');
+            if (!fileInput.files[0]) return;
+
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+
+            try {
+                const res = await fetch(`${API}/upload-image`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.url) {
+                    document.getElementById(prefix + '_image').value = data.url;
+                    // Update preview
+                    const preview = document.getElementById(prefix + '_image_preview');
+                    preview.querySelector('img').src = data.url;
+                    preview.querySelector('img').style.display = 'block';
+                    preview.querySelector('span').style.display = 'none';
+                    toast('Image processed successfully!');
+                }
+            } catch (e) { toast('Upload failed'); }
+        }
+
+        // --- Profile Logic ---
+        async function loadProfile() {
+            const res = await fetch(`${API}/profile`);
+            const d = await res.json();
+            if (d.name) {
+                document.getElementById('p_name').value = d.name;
+                document.getElementById('p_headline').value = d.headline;
+                document.getElementById('p_bio').value = d.bio;
+                document.getElementById('p_about').value = d.about;
+                document.getElementById('p_image').value = d.image;
+                document.getElementById('p_resume').value = d.resume;
+                document.getElementById('p_linkedin').value = d.linkedin;
+                document.getElementById('p_linkedin').value = d.linkedin;
+                document.getElementById('p_github').value = d.github;
+                document.getElementById('p_instagram').value = d.instagram || '';
+                document.getElementById('p_twitter').value = d.twitter || '';
+                document.getElementById('p_facebook').value = d.facebook || '';
+                document.getElementById('p_youtube').value = d.youtube || '';
+                document.getElementById('p_skills').value = d.skills || '';
+                document.getElementById('p_email').value = d.email || '';
+
+                if (d.image) {
+                    const preview = document.getElementById('p_image_preview');
+                    preview.querySelector('img').src = d.image;
+                    preview.querySelector('img').style.display = 'block';
+                    preview.querySelector('span').style.display = 'none';
+                }
+            }
+        }
+
+        document.getElementById('profileForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('p_name').value,
+                headline: document.getElementById('p_headline').value,
+                bio: document.getElementById('p_bio').value,
+                about: document.getElementById('p_about').value,
+                image: document.getElementById('p_image').value,
+                resume: document.getElementById('p_resume').value,
+                linkedin: document.getElementById('p_linkedin').value,
+                linkedin: document.getElementById('p_linkedin').value,
+                github: document.getElementById('p_github').value,
+                instagram: document.getElementById('p_instagram').value,
+                twitter: document.getElementById('p_twitter').value,
+                facebook: document.getElementById('p_facebook').value,
+                youtube: document.getElementById('p_youtube').value,
+                skills: document.getElementById('p_skills').value,
+                email: document.getElementById('p_email').value,
+            };
+            await fetch(`${API}/profile`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                body: JSON.stringify(data)
+            });
+
+            // Save navigation items
+            await saveMainNavItems();
+
+            toast('Identity Synchronized!');
+        };
+
+
+        // --- Nav Items Logic ---
+        async function loadNavItems() {
+            const res = await fetch(`${API}/nav-items`);
+            const data = await res.json();
+
+            // Sort by order
+            data.sort((a, b) => a.order - b.order);
+
+            // Load first 4 into inputs
+            for (let i = 0; i < 4; i++) {
+                const input = document.getElementById(`nav_${i + 1}_label`);
+                if (input && data[i]) {
+                    input.value = data[i].label || '';
+                    input.dataset.id = data[i].ID;
+                    input.dataset.link = data[i].link;
+                }
+            }
+        }
+
+        async function saveMainNavItems() {
+            // Save first 4 items
+            for (let i = 0; i < 4; i++) {
+                const input = document.getElementById(`nav_${i + 1}_label`);
+                if (input && input.dataset.id) {
+                    const data = {
+                        label: input.value,
+                        link: input.dataset.link,
+                        order: i + 1
+                    };
+                    await fetch(`${API}/nav-items/${input.dataset.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + localStorage.getItem('token')
+                        },
+                        body: JSON.stringify(data)
+                    });
+                }
+            }
+        }
+
+        function showAddNavModal() {
+            const newLabel = prompt('নতুন মেনু আইটেমের নাম লিখুন (যেমন: Blog, Services):');
+            if (!newLabel) return;
+
+            const newLink = prompt('লিঙ্ক লিখুন (যেমন: #blog বা https://...):');
+            if (!newLink) return;
+
+            addNewNavItem(newLabel, newLink);
+        }
+
+        async function addNewNavItem(label, link) {
+            // Find next order
+            const res = await fetch(`${API}/nav-items`);
+            const all = await res.json();
+            const maxOrder = Math.max(...all.map(item => item.order), 4);
+
+            const data = {
+                label: label,
+                link: link,
+                order: maxOrder + 1
+            };
+
+            await fetch(`${API}/nav-items`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                body: JSON.stringify(data)
+            });
+
+            toast('নতুন মেনু আইটেম যোগ হয়েছে!');
+            loadNavItems();
+        }
+
+        // --- Experience Logic ---
+        let editingExperienceId = null;
+
+        async function loadExperience() {
+            const res = await fetch(`${API}/experience`);
+            const data = await res.json();
+            const list = document.getElementById('experienceList');
+            list.innerHTML = '';
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                const itemStr = encodeURIComponent(JSON.stringify(item));
+                div.innerHTML = `
+                    <div class="list-item-info">
+                        <h3>${item.company}</h3>
+                        <p>${item.role} • ${item.start_date} — ${item.end_date}</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-outline" onclick="editExperience('${itemStr}')">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteExperience(${item.ID})">Remove</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        async function editExperience(itemStr) {
+            const item = JSON.parse(decodeURIComponent(itemStr));
+            editingExperienceId = item.ID;
+            document.getElementById('e_company').value = item.company;
+            document.getElementById('e_role').value = item.role;
+            document.getElementById('e_start').value = item.start_date;
+            document.getElementById('e_end').value = item.end_date;
+            document.getElementById('e_desc').value = item.description;
+            document.getElementById('e_tech').value = item.technologies;
+
+            document.querySelector('#experienceForm button[type="submit"]').textContent = 'Update Role';
+            document.getElementById('section-experience').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function deleteExperience(id) {
+            if (confirm('Permanently remove this entry?')) {
+                await fetch(`${API}/experience/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+                });
+                loadExperience();
+                toast('Entry purged');
+            }
+        }
+
+        document.getElementById('experienceForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                company: document.getElementById('e_company').value,
+                role: document.getElementById('e_role').value,
+                start_date: document.getElementById('e_start').value,
+                end_date: document.getElementById('e_end').value,
+                description: document.getElementById('e_desc').value,
+                technologies: document.getElementById('e_tech').value,
+            };
+
+            let method = 'POST';
+            let url = `${API}/experience`;
+
+            if (editingExperienceId) {
+                method = 'PUT';
+                url = `${API}/experience/${editingExperienceId}`;
+            }
+
+            await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                body: JSON.stringify(data)
+            });
+
+            document.getElementById('experienceForm').reset();
+            editingExperienceId = null;
+            document.querySelector('#experienceForm button[type="submit"]').textContent = 'Archive Role';
+            loadExperience();
+            toast(method === 'POST' ? 'New role archived!' : 'Role updated completely!');
+        };
+
+        // --- Projects Logic ---
+        let editingProjectId = null;
+
+        async function loadProjects() {
+            const res = await fetch(`${API}/projects?limit=50`);
+            const data = await res.json();
+            const list = document.getElementById('projectsList');
+            list.innerHTML = '';
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                const itemStr = encodeURIComponent(JSON.stringify(item));
+                div.innerHTML = `
+                    <div class="list-item-info">
+                        <h3>${item.title} ${item.featured ? '<span style="color: var(--accent); font-size: 0.8em;">★ Featured</span>' : ''}</h3>
+                        <p>${item.category || 'No tags'}</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-outline" onclick="editProject('${itemStr}')">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteProject(${item.ID})">Purge</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        async function editProject(itemStr) {
+            const item = JSON.parse(decodeURIComponent(itemStr));
+            editingProjectId = item.ID;
+            document.getElementById('pr_title').value = item.title;
+            document.getElementById('pr_content').value = item.content || item.summary || '';
+            document.getElementById('pr_category').value = item.category || '';
+            document.getElementById('pr_image').value = item.image || '';
+            document.getElementById('pr_featured').checked = item.featured || false;
+
+            if (item.image) {
+                const preview = document.getElementById('pr_image_preview');
+                preview.querySelector('img').src = item.image;
+                preview.querySelector('img').style.display = 'block';
+                preview.querySelector('span').style.display = 'none';
+            }
+
+            document.querySelector('#projectForm button[type="submit"]').textContent = 'Update Project';
+            document.getElementById('section-projects').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function deleteProject(id) {
+            if (confirm('Delete project data?')) {
+                await fetch(`${API}/projects/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+                });
+                loadProjects();
+                toast('Project purged');
+            }
+        }
+
+        document.getElementById('projectForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                title: document.getElementById('pr_title').value,
+                content: document.getElementById('pr_content').value,
+                summary: document.getElementById('pr_content').value.substring(0, 150),
+                category: document.getElementById('pr_category').value,
+                image: document.getElementById('pr_image').value,
+                featured: document.getElementById('pr_featured').checked,
+                github_link: "",
+                live_link: "",
+                order: 0
+            };
+
+            let method = 'POST';
+            let url = `${API}/projects`;
+
+            if (editingProjectId) {
+                method = 'PUT';
+                url = `${API}/projects/${editingProjectId}`;
+            }
+
+            await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                body: JSON.stringify(data)
+            });
+
+            document.getElementById('projectForm').reset();
+            document.getElementById('pr_image_preview').querySelector('img').style.display = 'none';
+            document.getElementById('pr_image_preview').querySelector('span').style.display = 'block';
+            editingProjectId = null;
+            document.querySelector('#projectForm button[type="submit"]').textContent = 'Deploy Project';
+            loadProjects();
+            toast(method === 'PUT' ? 'Project updated!' : 'Project deployed!');
+        };
+
+
+        // --- Writing Logic ---
+        let editingWritingId = null;
+
+        async function loadWriting() {
+            const res = await fetch(`${API}/articles?limit=50`);
+            const data = await res.json();
+            const list = document.getElementById('writingList');
+            list.innerHTML = '';
+            data.forEach(item => {
+                // Heuristic for writing: longer category or specific tag
+                const div = document.createElement('div');
+                const itemStr = encodeURIComponent(JSON.stringify(item));
+                div.className = 'list-item';
+                div.innerHTML = `
+                    <div class="list-item-info">
+                        <h3>${item.title}</h3>
+                        <p>${item.category}</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-outline" onclick="editWriting('${itemStr}')">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteWriting(${item.ID})">Remove</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        async function editWriting(itemStr) {
+            const item = JSON.parse(decodeURIComponent(itemStr));
+            editingWritingId = item.id;
+            document.getElementById('wr_title').value = item.title;
+            document.getElementById('wr_content').value = item.content;
+            document.getElementById('wr_category').value = item.category;
+            document.getElementById('wr_image').value = item.image || '';
+
+            if (item.image) {
+                const preview = document.getElementById('wr_image_preview');
+                preview.querySelector('img').src = item.image;
+                preview.querySelector('img').style.display = 'block';
+                preview.querySelector('span').style.display = 'none';
+            }
+
+            document.querySelector('#writingForm button[type="submit"]').textContent = 'Update Entry';
+            document.getElementById('section-writing').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function deleteWriting(id) {
+            if (confirm('Delete journal entry?')) {
+                await fetch(`${API}/delete-article`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `id=${id}`
+                });
+                loadWriting();
+                toast('Entry removed');
+            }
+        }
+
+        document.getElementById('writingForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                title: document.getElementById('wr_title').value,
+                content: document.getElementById('wr_content').value,
+                category: document.getElementById('wr_category').value,
+                image: document.getElementById('wr_image').value,
+                author: "Jaber Systems"
+            };
+
+            let url = `${API}/add-article`;
+            if (editingWritingId) {
+                data.id = editingWritingId;
+                url = `${API}/update-article`;
+            }
+
+            await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            document.getElementById('writingForm').reset();
+            document.getElementById('wr_image_preview').querySelector('img').style.display = 'none';
+            document.getElementById('wr_image_preview').querySelector('span').style.display = 'block';
+            editingWritingId = null;
+            document.querySelector('#writingForm button[type="submit"]').textContent = 'Publish Entry';
+            loadWriting();
+            toast(editingWritingId ? 'Entry updated' : 'Entry published');
+        };
+
+        function logout() {
+            document.cookie = 'auth_token=; Max-Age=0; path=/';
+            window.location.href = '/login';
+        }
+
+        // Init
+        loadProfile();
+
+        // --- Achievements Logic ---
+        async function loadAchievements() {
+            const res = await fetch(`${API}/achievements`);
+            const data = await res.json();
+            const list = document.getElementById('achievementList');
+            list.innerHTML = data.map(i => `
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <h3>${i.title} <span style="font-size: 0.8em; color: var(--accent); margin-left:8px;">${i.date}</span></h3>
+                        <p>${i.description}</p>
+                    </div>
+                    <button class="btn btn-danger" onclick="deleteItem('achievements', ${i.ID}, loadAchievements)">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('achievementForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                title: document.getElementById('ach_title').value,
+                date: document.getElementById('ach_date').value,
+                description: document.getElementById('ach_desc').value
+            };
+            await fetch(`${API}/achievements`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                body: JSON.stringify(data)
+            });
+            e.target.reset();
+            loadAchievements();
+            toast('Achievement Added!');
+        };
+
+        // --- Photos Logic ---
+        async function loadPhotos() {
+            const res = await fetch(`${API}/photos`);
+            const data = await res.json();
+            const list = document.getElementById('photoList');
+            list.innerHTML = data.map(i => `
+                <div class="card" style="margin:0; padding: 10px; position: relative;">
+                    <img src="${i.image}" style="width:100%; height: 150px; object-fit: cover; border-radius: 8px;">
+                    <p style="margin-top: 8px; font-size: 0.9em; color: var(--text-slate)">${i.caption || 'No Caption'}</p>
+                    <button class="btn btn-danger" style="position: absolute; top: 5px; right: 5px; padding: 4px 8px; font-size: 0.7rem;" 
+                        onclick="deleteItem('photos', ${i.ID}, loadPhotos)">X</button>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('photoForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                image: document.getElementById('ph_image').value,
+                caption: document.getElementById('ph_caption').value
+            };
+            await fetch(`${API}/photos`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                body: JSON.stringify(data)
+            });
+            e.target.reset();
+            document.getElementById('ph_image_preview').querySelector('img').style.display = 'none';
+            document.getElementById('ph_image_preview').querySelector('span').style.display = 'block';
+            loadPhotos();
+            toast('Photo Added!');
+        };
+
+        // --- Videos Logic ---
+        async function loadVideos() {
+            const res = await fetch(`${API}/videos`);
+            const data = await res.json();
+            const list = document.getElementById('videoList');
+            list.innerHTML = data.map(i => `
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <h3>${i.title}</h3>
+                        <p><a href="${i.youtube_link}" target="_blank" style="color: var(--accent)">Watch Video</a></p>
+                        <p>${i.description}</p>
+                    </div>
+                    <button class="btn btn-danger" onclick="deleteItem('videos', ${i.ID}, loadVideos)">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('videoForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                title: document.getElementById('vid_title').value,
+                youtube_link: document.getElementById('vid_link').value,
+                description: document.getElementById('vid_desc').value
+            };
+            await fetch(`${API}/videos`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                body: JSON.stringify(data)
+            });
+            e.target.reset();
+            loadVideos();
+            toast('Video Added!');
+        };
+
+        // Generic Delete Helper
+        async function deleteItem(endpoint, id, reloadFunc) {
+            if (!confirm('Are you sure?')) return;
+            await fetch(`${API}/${endpoint}/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            });
+            reloadFunc();
+            toast('Deleted Successfully');
+        }
+    </script>
+</body>
+
+</html>
