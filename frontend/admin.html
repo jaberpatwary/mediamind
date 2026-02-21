@@ -4,1449 +4,1485 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Premium</title>
+    <title>MediaMind — Admin Panel</title>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            if (!localStorage.getItem('token')) {
-                window.location.href = '/login';
-            } else {
-                document.getElementById('adminBody').style.display = 'flex';
-            }
-        });
-
-        function logout() {
-            localStorage.removeItem('token');
-            window.location.href = '/login';
-        }
+        // Auth guard
+        if (!localStorage.getItem('token')) { window.location.href = '/login'; }
     </script>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <style>
         :root {
-            /* Primary Backgrounds - AIT Dark Theme */
-            --bg-dark: #0B0E14;
-            --bg-light: #161B22;
-            --bg-lighter: #1C2128;
-            --bg-elevated: #21262D;
-
-            /* Accent Colors - Teal/Cyan Brand */
-            --accent: #2DD4BF;
-            --accent-hover: #34E6D2;
-            --accent-tint: rgba(45, 212, 191, 0.12);
-            --accent-glow: 0 0 20px rgba(45, 212, 191, 0.2);
-            --gradient-primary: linear-gradient(135deg, #2DD4BF 0%, #38BDF8 100%);
-
-            /* Text Colors */
-            --text-main: #E2E8F0;
-            --text-slate: #94A3B8;
-            --text-lightest: #F8FAFC;
-            --text-muted: #64748B;
-
-            /* Borders */
-            --border: #30363D;
-            --border-light: #21262D;
-
-            /* Status Colors */
-            --danger: #EF4444;
-            --success: #10B981;
-            --warning: #F59E0B;
-
-            /* Transitions */
-            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-slow: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --bg: #0A0B0D;
+            --bg2: #111217;
+            --bg3: #1A1B20;
+            --bg4: #252730;
+            --text: #E4E6EB;
+            --muted: #9BA3AF;
+            --blue: #3B82F6;
+            --blue-l: #60A5FA;
+            --purple: #8B5CF6;
+            --pink: #EC4899;
+            --green: #10B981;
+            --red: #EF4444;
+            --yellow: #F59E0B;
+            --border: rgba(255, 255, 255, 0.07);
+            --grad: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%);
         }
 
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
             font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
             display: flex;
             min-height: 100vh;
         }
 
-        /* --- Sidebar --- */
+        /* ── SIDEBAR ── */
         .sidebar {
-            width: 280px;
-            background: linear-gradient(180deg, var(--bg-light) 0%, var(--bg-dark) 100%);
+            width: 260px;
+            min-height: 100vh;
+            background: var(--bg2);
             border-right: 1px solid var(--border);
+            padding: 0;
             display: flex;
             flex-direction: column;
-            padding: 2rem 1.5rem;
             flex-shrink: 0;
-            z-index: 10;
-            backdrop-filter: blur(10px);
         }
 
-        .sidebar h2 {
-            background: var(--gradient-primary);
+        .sb-logo {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sb-logo span {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: var(--grad);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            font-size: 1.5rem;
-            margin-bottom: 2.5rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 700;
-            filter: drop-shadow(var(--accent-glow));
         }
 
-        .sidebar h2::before {
-            content: '{ }';
-            font-family: 'Fira Code', monospace;
-            font-size: 1.2rem;
+        .sb-logo p {
+            font-size: .75rem;
+            color: var(--muted);
+            margin-top: 3px;
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        .nav-items {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+        .sb-nav {
+            padding: 16px 12px;
+            flex: 1;
+        }
+
+        .nav-group {
+            margin-bottom: 24px;
+        }
+
+        .nav-label {
+            font-size: .7rem;
+            font-weight: 600;
+            color: var(--muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 0 12px;
+            margin-bottom: 6px;
         }
 
         .nav-item {
-            padding: 12px 16px;
-            color: var(--text-slate);
-            cursor: pointer;
-            border-radius: 8px;
-            transition: var(--transition);
-            font-weight: 500;
             display: flex;
             align-items: center;
             gap: 12px;
-        }
-
-        .nav-item:hover {
-            color: var(--accent);
-            background: var(--bg-lighter);
-        }
-
-        .nav-item.active {
-            background-color: var(--accent-tint);
-            color: var(--accent);
-        }
-
-        .sidebar-footer {
-            margin-top: auto;
-            border-top: 1px solid var(--border);
-            padding-top: 1.5rem;
-        }
-
-        /* --- Main Content --- */
-        .main-content {
-            flex-grow: 1;
-            padding: 3rem;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: .9rem;
+            font-weight: 500;
+            color: var(--muted);
+            transition: .2s;
             position: relative;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
+        .nav-item:hover {
+            background: var(--bg3);
+            color: var(--text);
         }
 
+        .nav-item.active {
+            background: rgba(59, 130, 246, .1);
+            color: var(--blue-l);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20%;
+            height: 60%;
+            width: 3px;
+            background: var(--grad);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .nav-icon {
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sb-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sb-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: var(--bg3);
+        }
+
+        .sb-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--grad);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: .85rem;
+            flex-shrink: 0;
+        }
+
+        .sb-user-info p {
+            font-size: .85rem;
+            font-weight: 600;
+        }
+
+        .sb-user-info span {
+            font-size: .72rem;
+            color: var(--muted);
+        }
+
+        .btn-logout {
+            width: 100%;
+            margin-top: 10px;
+            padding: 9px;
+            background: rgba(239, 68, 68, .08);
+            border: 1px solid rgba(239, 68, 68, .2);
+            color: var(--red);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: .88rem;
+            font-weight: 600;
+            transition: .2s;
+        }
+
+        .btn-logout:hover {
+            background: var(--red);
+            color: #fff;
+        }
+
+        /* ── MAIN ── */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .topbar {
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg2);
+        }
+
+        .topbar h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .topbar p {
+            font-size: .85rem;
+            color: var(--muted);
+        }
+
+        .content {
+            padding: 32px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* ── SECTIONS ── */
         .section {
             display: none;
-            animation: slideUp 0.4s ease-out;
+            animation: fadeUp .3s ease;
         }
 
         .section.active {
             display: block;
         }
 
-        @keyframes slideUp {
+        @keyframes fadeUp {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(12px)
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0)
             }
         }
 
-        header {
-            margin-bottom: 2.5rem;
-        }
-
-        header h1 {
-            font-size: 2rem;
-            color: var(--text-lightest);
-            margin-bottom: 8px;
-        }
-
-        header p {
-            color: var(--text-slate);
-        }
-
-        /* --- Cards & Forms --- */
+        /* ── CARDS ── */
         .card {
-            background: var(--bg-light);
+            background: var(--bg2);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            margin-bottom: 2rem;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 24px;
             position: relative;
             overflow: hidden;
         }
 
-        .card::before {
+        .card::after {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             height: 1px;
-            background: var(--gradient-primary);
-            opacity: 0.5;
+            background: var(--grad);
+            opacity: .4;
         }
 
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ── FORMS ── */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 18px;
         }
 
-        .full-width {
+        .fg-full {
             grid-column: span 2;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
         label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--text-main);
-            font-weight: 500;
-            font-size: 0.9rem;
+            font-size: .83rem;
+            font-weight: 600;
+            color: var(--muted);
         }
 
         input,
         textarea,
         select {
-            width: 100%;
-            background-color: var(--bg-dark);
+            background: var(--bg);
             border: 1px solid var(--border);
-            color: var(--text-lightest);
-            padding: 12px 16px;
+            color: var(--text);
+            padding: 11px 14px;
             border-radius: 8px;
             font-family: inherit;
-            font-size: 0.95rem;
-            transition: var(--transition);
+            font-size: .9rem;
+            transition: .2s;
+            outline: none;
+            width: 100%;
         }
 
         input:focus,
-        textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px var(--accent-tint);
+        textarea:focus,
+        select:focus {
+            border-color: var(--blue);
+            background: var(--bg3);
         }
 
+        input::placeholder,
+        textarea::placeholder {
+            color: rgba(155, 163, 175, .5);
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        /* ── BUTTONS ── */
         .btn {
-            padding: 12px 24px;
+            padding: 10px 22px;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
-            transition: var(--transition);
             border: none;
+            font-family: inherit;
+            font-size: .88rem;
+            transition: all .2s;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.95rem;
+            gap: 7px;
         }
 
         .btn-primary {
-            background: var(--gradient-primary);
-            color: white;
-            font-weight: 600;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn-primary:hover::before {
-            left: 100%;
+            background: var(--grad);
+            color: #fff;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: var(--accent-glow), 0 8px 25px rgba(45, 212, 191, 0.3);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, .3);
+        }
+
+        .btn-sm {
+            padding: 7px 14px;
+            font-size: .8rem;
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, .1);
+            color: var(--red);
+            border: 1px solid rgba(239, 68, 68, .25);
+        }
+
+        .btn-danger:hover {
+            background: var(--red);
+            color: #fff;
         }
 
         .btn-outline {
             background: transparent;
-            border: 1px solid var(--accent);
-            color: var(--accent);
+            color: var(--blue-l);
+            border: 1px solid rgba(59, 130, 246, .3);
         }
 
         .btn-outline:hover {
-            background: var(--accent-tint);
+            background: rgba(59, 130, 246, .1);
         }
 
-        .btn-danger {
-            background: rgba(248, 81, 73, 0.1);
-            color: var(--danger);
-            border: 1px solid var(--danger);
+        .btn-green {
+            background: rgba(16, 185, 129, .1);
+            color: var(--green);
+            border: 1px solid rgba(16, 185, 129, .25);
         }
 
-        .btn-danger:hover {
-            background: var(--danger);
-            color: white;
+        .btn-green:hover {
+            background: var(--green);
+            color: #fff;
         }
 
-        /* --- List Items --- */
+        /* ── ITEMS LIST ── */
         .item-list {
-            display: grid;
-            gap: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
         }
 
         .list-item {
-            background: var(--bg-lighter);
-            padding: 1.25rem;
-            border-radius: 12px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            border: 1px solid transparent;
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .list-item::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 12px;
-            padding: 1px;
-            background: var(--gradient-primary);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask-composite: exclude;
-            opacity: 0;
-            transition: var(--transition);
-        }
-
-        .list-item:hover::before {
-            opacity: 1;
+            gap: 16px;
+            transition: all .2s;
         }
 
         .list-item:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--accent-glow), 0 8px 20px rgba(0, 0, 0, 0.3);
+            border-color: rgba(59, 130, 246, .3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .3);
         }
 
-        .list-item-info h3 {
-            font-size: 1.1rem;
-            color: var(--text-lightest);
-            margin-bottom: 4px;
+        .list-item-img {
+            width: 52px;
+            height: 52px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: var(--bg4);
         }
 
-        .list-item-info p {
-            color: var(--text-slate);
-            font-size: 0.85rem;
+        .list-item-body {
+            flex: 1;
+            min-width: 0;
         }
 
-        /* --- Upload Component --- */
-        .upload-area {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .upload-preview {
-            width: 100px;
-            height: 60px;
-            border-radius: 6px;
-            background: var(--bg-dark);
-            border: 1px dashed var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .list-item-body h4 {
+            font-size: .95rem;
+            font-weight: 600;
+            white-space: nowrap;
             overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .upload-preview img {
+        .list-item-body p {
+            font-size: .8rem;
+            color: var(--muted);
+            margin-top: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .list-item-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 600;
+        }
+
+        .badge-blue {
+            background: rgba(59, 130, 246, .15);
+            color: var(--blue-l);
+        }
+
+        .badge-green {
+            background: rgba(16, 185, 129, .15);
+            color: var(--green);
+        }
+
+        .badge-yellow {
+            background: rgba(245, 158, 11, .15);
+            color: var(--yellow);
+        }
+
+        /* ── PHOTO GRID ── */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .photo-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            background: var(--bg3);
+            cursor: pointer;
+        }
+
+        .photo-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
-        /* --- Toast Notifications --- */
+        .photo-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            opacity: 0;
+            transition: .2s;
+        }
+
+        .photo-item:hover .photo-overlay {
+            opacity: 1;
+        }
+
+        /* ── STATS ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .stat-info p {
+            font-size: .78rem;
+            color: var(--muted);
+        }
+
+        .stat-info h3 {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        /* ── UPLOAD ── */
+        .upload-box {
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: .2s;
+            cursor: pointer;
+        }
+
+        .upload-box:hover {
+            border-color: var(--blue);
+            background: rgba(59, 130, 246, .05);
+        }
+
+        .upload-preview {
+            width: 80px;
+            height: 50px;
+            border-radius: 6px;
+            background: var(--bg3);
+            object-fit: cover;
+            border: 1px solid var(--border);
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--muted);
+        }
+
+        .empty span {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .empty p {
+            font-size: .9rem;
+        }
+
+        /* ── TOAST ── */
         #toast {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
-            padding: 16px 24px;
-            border-radius: 8px;
-            background: var(--bg-light);
-            border-left: 4px solid var(--accent);
-            color: var(--text-lightest);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transform: translateY(100px);
-            transition: transform 0.3s ease;
-            z-index: 1000;
+            bottom: 24px;
+            right: 24px;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--blue);
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: .88rem;
+            transform: translateY(80px);
+            opacity: 0;
+            transition: .3s;
+            z-index: 9999;
+            max-width: 320px;
         }
 
         #toast.show {
             transform: translateY(0);
+            opacity: 1;
         }
 
-        /* Icons (SVG placeholders) */
-        .icon {
-            width: 18px;
-            height: 18px;
-            fill: currentColor;
+        #toast.success {
+            border-left-color: var(--green);
+        }
+
+        #toast.error {
+            border-left-color: var(--red);
+        }
+
+        /* ── MODAL ── */
+        .modal-bg {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .7);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .modal-bg.open {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 1.4rem;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--text);
+        }
+
+        @media(max-width:900px) {
+            .sidebar {
+                width: 220px;
+            }
         }
     </style>
 </head>
 
-<body style="display: none;" id="adminBody">
+<body>
 
+    <!-- SIDEBAR -->
     <aside class="sidebar">
-        <h2>Jaber Core</h2>
-        <div class="nav-items">
-            <div class="nav-item active" onclick="showSection('profile')">
-                <svg class="icon" viewBox="0 0 24 24">
-                    <path
-                        d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                </svg>
-                Identity
-            </div>
-            <div class="nav-item" onclick="showSection('experience')">
-                <svg class="icon" viewBox="0 0 24 24">
-                    <path
-                        d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z" />
-                </svg>
-                Experience
-            </div>
-            <div class="nav-item" onclick="showSection('projects')">
-                <svg class="icon" viewBox="0 0 24 24">
-                    <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
-                </svg>
-                Projects
-            </div>
-            <div class="nav-item" onclick="showSection('writing')">
-                <svg class="icon" viewBox="0 0 24 24">
-                    <path
-                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                </svg>
-                Journal
-            </div>
-            <div class="nav-item" onclick="showSection('achievements')">
-                <svg class="icon" viewBox="0 0 24 24">
-                    <path
-                        d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM7 8c0-1.66 1.34-3 3-3v3c-1.66 0-3-1.34-3-3zm10 0c-1.66 0-3-1.34-3-3v3c1.66 0 3-1.34 3-3z" />
-                </svg>
-                Achievements
-            </div>
-            <div class="nav-item" onclick="showSection('photos')">
-                <svg class="icon" viewBox="0 0 24 24">
-                    <path
-                        d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-                </svg>
-                Photos (Gallery)
-            </div>
-            <div class="nav-item" onclick="showSection('videos')">
-                <svg class="icon" viewBox="0 0 24 24">
-                    <path
-                        d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
-                </svg>
-                Videos
-            </div>
+        <div class="sb-logo">
+            <span>MediaMind</span>
+            <p>// admin panel v2.0</p>
         </div>
-        <div class="sidebar-footer">
-            <div class="nav-item" onclick="logout()">
-                <svg class="icon" viewBox="0 0 24 24" style="color: var(--danger)">
-                    <path
-                        d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z" />
-                </svg>
-                Terminate Session
+        <nav class="sb-nav">
+            <div class="nav-group">
+                <div class="nav-label">Overview</div>
+                <div class="nav-item active" data-section="dashboard" onclick="nav(this,'dashboard')">
+                    <span class="nav-icon">📊</span> Dashboard
+                </div>
             </div>
+            <div class="nav-group">
+                <div class="nav-label">Content</div>
+                <div class="nav-item" data-section="profile" onclick="nav(this,'profile')">
+                    <span class="nav-icon">👤</span> Profile
+                </div>
+                <div class="nav-item" data-section="projects" onclick="nav(this,'projects')">
+                    <span class="nav-icon">🚀</span> Projects
+                </div>
+                <div class="nav-item" data-section="experience" onclick="nav(this,'experience')">
+                    <span class="nav-icon">💼</span> Experience
+                </div>
+                <div class="nav-item" data-section="writing" onclick="nav(this,'writing')">
+                    <span class="nav-icon">✍️</span> Blog / Writing
+                </div>
+                <div class="nav-item" data-section="achievements" onclick="nav(this,'achievements')">
+                    <span class="nav-icon">🏆</span> Achievements
+                </div>
+            </div>
+            <div class="nav-group">
+                <div class="nav-label">Media</div>
+                <div class="nav-item" data-section="photos" onclick="nav(this,'photos')">
+                    <span class="nav-icon">🖼️</span> Photos
+                </div>
+                <div class="nav-item" data-section="videos" onclick="nav(this,'videos')">
+                    <span class="nav-icon">🎬</span> Videos
+                </div>
+            </div>
+        </nav>
+        <div class="sb-footer">
+            <div class="sb-user">
+                <div class="sb-avatar">A</div>
+                <div class="sb-user-info">
+                    <p>Admin</p>
+                    <span>admin@admin.com</span>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="logout()">🚪 Logout</button>
         </div>
     </aside>
 
-    <main class="main-content">
-        <div class="container">
+    <!-- MAIN -->
+    <div class="main">
+        <div class="topbar">
+            <div>
+                <h2 id="topbarTitle">Dashboard</h2>
+                <p id="topbarSub">Welcome back to MediaMind Admin</p>
+            </div>
+            <a href="/" target="_blank" class="btn btn-outline btn-sm">🌐 View Site</a>
+        </div>
 
-            <!-- Profile Section -->
-            <div id="section-profile" class="section active">
-                <header>
-                    <h1>Identity Core</h1>
-                    <p>Manage your primary digital presence and profile metadata.</p>
-                </header>
+        <div class="content">
 
+            <!-- DASHBOARD -->
+            <div id="sec-dashboard" class="section active">
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:rgba(59,130,246,.15);">🚀</div>
+                        <div class="stat-info">
+                            <p>Projects</p>
+                            <h3 id="statProjects">—</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:rgba(16,185,129,.15);">💼</div>
+                        <div class="stat-info">
+                            <p>Experience</p>
+                            <h3 id="statExp">—</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:rgba(139,92,246,.15);">✍️</div>
+                        <div class="stat-info">
+                            <p>Blog Posts</p>
+                            <h3 id="statWriting">—</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:rgba(245,158,11,.15);">🏆</div>
+                        <div class="stat-info">
+                            <p>Achievements</p>
+                            <h3 id="statAch">—</h3>
+                        </div>
+                    </div>
+                </div>
                 <div class="card">
-                    <form id="profileForm" class="form-grid">
+                    <div class="card-title">📋 Recent Projects</div>
+                    <div id="dashProjects">
+                        <div class="empty"><span>⏳</span>
+                            <p>Loading...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROFILE -->
+            <div id="sec-profile" class="section">
+                <div class="card">
+                    <div class="card-title">👤 Personal Information</div>
+                    <form class="form-grid" id="profileForm">
                         <div class="form-group">
                             <label>Display Name</label>
-                            <input type="text" id="p_name" placeholder="Mabubul Alam Jaber">
+                            <input type="text" id="p_name" placeholder="Your full name">
                         </div>
                         <div class="form-group">
-                            <label>Headline</label>
-                            <input type="text" id="p_headline" placeholder="System Engineer | TEDx Speaker">
+                            <label>Headline / Title</label>
+                            <input type="text" id="p_headline" placeholder="e.g. Software Engineer">
                         </div>
-                        <div class="form-group full-width">
-                            <label>Avatar / Profile Photo</label>
-                            <div class="upload-area">
-                                <div class="upload-preview" id="p_image_preview">
-                                    <img src="" alt="" style="display:none">
-                                    <span style="font-size: 10px; color: var(--text-slate)">No Preview</span>
-                                </div>
-                                <input type="text" id="p_image" placeholder="Image URL">
-                                <input type="file" id="p_file" style="display:none" onchange="uploadFile('p')">
-                                <button type="button" class="btn btn-outline"
-                                    onclick="document.getElementById('p_file').click()">Upload New</button>
-                            </div>
+                        <div class="form-group fg-full">
+                            <label>Short Bio</label>
+                            <textarea id="p_bio" rows="3" placeholder="A brief introduction..."></textarea>
                         </div>
-                        <div class="form-group full-width">
-                            <label>Short Bio (Sidebar)</label>
-                            <textarea id="p_bio" rows="3"></textarea>
+                        <div class="form-group fg-full">
+                            <label>About Me (detailed)</label>
+                            <textarea id="p_about" rows="6" placeholder="Detailed about section..."></textarea>
                         </div>
-                        <div class="form-group full-width">
-                            <label>About Me (Detailed Narrative)</label>
-                            <textarea id="p_about" rows="6"></textarea>
-                        </div>
-                        <div class="form-group full-width">
-                            <label>Skills (Comma separated, e.g. Go, React, Docker)</label>
-                            <input type="text" id="p_skills"
-                                placeholder="Go, Fiber, React, Node.js, PostgreSQL, Docker">
+                        <div class="form-group fg-full">
+                            <label>Skills (comma separated)</label>
+                            <input type="text" id="p_skills" placeholder="Go, React, PostgreSQL, Docker...">
                         </div>
                         <div class="form-group">
-                            <label>LinkedIn</label>
-                            <input type="text" id="p_linkedin">
-                        </div>
-                        <div class="form-group">
-                            <label>GitHub</label>
-                            <input type="text" id="p_github">
-                        </div>
-                        <div class="form-group">
-                            <label>Instagram</label>
-                            <input type="text" id="p_instagram">
-                        </div>
-                        <div class="form-group">
-                            <label>Twitter (X)</label>
-                            <input type="text" id="p_twitter">
-                        </div>
-                        <div class="form-group">
-                            <label>Facebook</label>
-                            <input type="text" id="p_facebook">
-                        </div>
-                        <div class="form-group">
-                            <label>YouTube</label>
-                            <input type="text" id="p_youtube">
+                            <label>Email</label>
+                            <input type="email" id="p_email">
                         </div>
                         <div class="form-group">
                             <label>Resume URL</label>
-                            <input type="text" id="p_resume">
+                            <input type="url" id="p_resume" placeholder="https://...">
                         </div>
                         <div class="form-group">
-                            <label>Primary Email</label>
-                            <input type="email" id="p_email">
-                        </div>
-
-
-                        <!-- Navigation Menu -->
-                        <h3 style="grid-column: span 2; margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent);">
-                            Navigation Menu</h3>
-                        <div class="form-group">
-                            <label>01. About</label>
-                            <input type="text" id="nav_1_label" placeholder="About">
+                            <label>GitHub</label>
+                            <input type="url" id="p_github" placeholder="https://github.com/...">
                         </div>
                         <div class="form-group">
-                            <label>02. Experience</label>
-                            <input type="text" id="nav_2_label" placeholder="Experience">
+                            <label>LinkedIn</label>
+                            <input type="url" id="p_linkedin" placeholder="https://linkedin.com/in/...">
                         </div>
                         <div class="form-group">
-                            <label>03. Work</label>
-                            <input type="text" id="nav_3_label" placeholder="Work">
+                            <label>Twitter / X</label>
+                            <input type="url" id="p_twitter" placeholder="https://twitter.com/...">
                         </div>
                         <div class="form-group">
-                            <label>04. Contact</label>
-                            <input type="text" id="nav_4_label" placeholder="Contact">
+                            <label>Instagram</label>
+                            <input type="url" id="p_instagram">
                         </div>
-
-                        <!-- Add More Button -->
-                        <div class="full-width" style="margin-top: 1rem;">
-                            <button type="button" class="btn btn-outline" onclick="showAddNavModal()">+ Add More Menu
-                                Items</button>
+                        <div class="form-group">
+                            <label>Facebook</label>
+                            <input type="url" id="p_facebook">
                         </div>
+                        <div class="form-group">
+                            <label>YouTube</label>
+                            <input type="url" id="p_youtube">
+                        </div>
+                        <div class="form-group fg-full form-actions">
+                            <button type="submit" class="btn btn-primary">💾 Save Profile</button>
+                        </div>
+                    </form>
                 </div>
+            </div>
 
-                <div class="full-width" style="text-align: right; margin-top: 1rem;">
-                    <button type="submit" class="btn btn-primary">Synchronize Identity</button>
+            <!-- PROJECTS -->
+            <div id="sec-projects" class="section">
+                <div id="projectsList" class="item-list"></div>
+                <div class="card">
+                    <div class="card-title">➕ Add New Project</div>
+                    <form class="form-grid" id="projectForm">
+                        <input type="hidden" id="pr_id">
+                        <div class="form-group fg-full">
+                            <label>Project Title *</label>
+                            <input type="text" id="pr_title" required placeholder="My Awesome Project">
+                        </div>
+                        <div class="form-group fg-full">
+                            <label>Short Summary</label>
+                            <input type="text" id="pr_summary" placeholder="One-line description">
+                        </div>
+                        <div class="form-group fg-full">
+                            <label>Full Description *</label>
+                            <textarea id="pr_content" rows="5" required
+                                placeholder="Describe the project in detail..."></textarea>
+                        </div>
+                        <div class="form-group fg-full">
+                            <label>Image URL</label>
+                            <input type="url" id="pr_image" placeholder="https://..."
+                                oninput="previewImg('pr_image','pr_img_preview')">
+                            <img id="pr_img_preview" class="upload-preview" src="" alt=""
+                                style="margin-top:8px;display:none;">
+                        </div>
+                        <div class="form-group">
+                            <label>Category / Tags</label>
+                            <input type="text" id="pr_category" placeholder="Go, React, MySQL">
+                        </div>
+                        <div class="form-group">
+                            <label>Display Order</label>
+                            <input type="number" id="pr_order" placeholder="1" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>GitHub Link</label>
+                            <input type="url" id="pr_github" placeholder="https://github.com/...">
+                        </div>
+                        <div class="form-group">
+                            <label>Live Demo Link</label>
+                            <input type="url" id="pr_live" placeholder="https://...">
+                        </div>
+                        <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+                            <input type="checkbox" id="pr_featured"
+                                style="width:18px;height:18px;cursor:pointer;flex-shrink:0;">
+                            <label style="margin:0;cursor:pointer;" for="pr_featured">⭐ Featured Project</label>
+                        </div>
+                        <div class="form-actions fg-full">
+                            <button type="button" class="btn btn-outline" onclick="resetProjectForm()">Clear</button>
+                            <button type="submit" class="btn btn-primary">Save Project</button>
+                        </div>
+                    </form>
                 </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Experience Section -->
-        <div id="section-experience" class="section">
-            <header>
-                <h1>Professional Chronology</h1>
-                <p>Update your career milestones and organizational impact.</p>
-            </header>
-
-            <div class="item-list" id="experienceList">
-                <!-- Loaded via JS -->
             </div>
 
-            <div class="card" style="margin-top: 2rem;">
-                <h3>Register New Role</h3>
-                <form id="experienceForm" class="form-grid" style="margin-top: 1.5rem;">
-                    <input type="hidden" id="e_id">
-                    <div class="form-group">
-                        <label>Organization</label>
-                        <input type="text" id="e_company" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Position / Role</label>
-                        <input type="text" id="e_role" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Duration Start</label>
-                        <input type="text" id="e_start" placeholder="Jan 2024">
-                    </div>
-                    <div class="form-group">
-                        <label>Duration End</label>
-                        <input type="text" id="e_end" placeholder="Present">
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Core Responsibilities</label>
-                        <textarea id="e_desc" rows="3"></textarea>
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Stack / Technologies</label>
-                        <input type="text" id="e_tech" placeholder="Go, Kubernetes, Cloud Native">
-                    </div>
-                    <div class="full-width" style="text-align: right;">
-                        <button type="submit" class="btn btn-primary">Archive Role</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Projects Section -->
-        <div id="section-projects" class="section">
-            <header>
-                <h1>Technical Portfolio</h1>
-                <p>Showcase the products and digital artifacts you've engineered.</p>
-            </header>
-
-            <div class="item-list" id="projectsList">
-                <!-- Loaded via JS -->
-            </div>
-
-            <div class="card" style="margin-top: 2rem;">
-                <h3>Initiate New Project</h3>
-                <form id="projectForm" class="form-grid" style="margin-top: 1.5rem;">
-                    <div class="form-group full-width">
-                        <label>Project Designation</label>
-                        <input type="text" id="pr_title" required>
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Visual Identity (Cover Photo)</label>
-                        <div class="upload-area">
-                            <div class="upload-preview" id="pr_image_preview">
-                                <img src="" alt="" style="display:none">
-                                <span style="font-size: 10px; color: var(--text-slate)">No Preview</span>
-                            </div>
-                            <input type="text" id="pr_image" placeholder="Image URL">
-                            <input type="file" id="pr_file" style="display:none" onchange="uploadFile('pr')">
-                            <button type="button" class="btn btn-outline"
-                                onclick="document.getElementById('pr_file').click()">Upload Graphic</button>
+            <!-- EXPERIENCE -->
+            <div id="sec-experience" class="section">
+                <div id="experienceList" class="item-list"></div>
+                <div class="card">
+                    <div class="card-title">➕ Add New Experience</div>
+                    <form class="form-grid" id="experienceForm">
+                        <input type="hidden" id="e_id">
+                        <div class="form-group">
+                            <label>Company / Organization *</label>
+                            <input type="text" id="e_company" required placeholder="Google, Meta, Startup...">
                         </div>
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Project Narrative</label>
-                        <textarea id="pr_content" rows="4" required
-                            placeholder="Describe the problem, solution, and impact..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Classification / Tags</label>
-                        <input type="text" id="pr_category" placeholder="React, MySQL, AWS">
-                    </div>
-                    <div class="form-group" style="display: flex; align-items: center; gap: 10px; padding-top: 30px;">
-                        <input type="checkbox" id="pr_featured" style="width: 20px; height: 20px; cursor: pointer;">
-                        <label style="margin: 0; cursor: pointer;" for="pr_featured">Prioritize in Spotlight</label>
-                    </div>
-                    <div class="full-width" style="text-align: right;">
-                        <button type="submit" class="btn btn-primary">Deploy Project</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Writing Section -->
-        <div id="section-writing" class="section">
-            <header>
-                <h1>Technical Journal</h1>
-                <p>Curate your thoughts, tutorials and technical documentation.</p>
-            </header>
-
-            <div class="item-list" id="writingList">
-                <!-- Loaded via JS -->
-            </div>
-
-            <div class="card" style="margin-top: 2rem;">
-                <h3>Publish New Article</h3>
-                <form id="writingForm" class="form-grid" style="margin-top: 1.5rem;">
-                    <div class="form-group full-width">
-                        <label>Headline</label>
-                        <input type="text" id="wr_title" required>
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Feature Graphic</label>
-                        <div class="upload-area">
-                            <div class="upload-preview" id="wr_image_preview">
-                                <img src="" alt="" style="display:none">
-                                <span style="font-size: 10px; color: var(--text-slate)">No Preview</span>
-                            </div>
-                            <input type="text" id="wr_image" placeholder="Image URL">
-                            <input type="file" id="wr_file" style="display:none" onchange="uploadFile('wr')">
-                            <button type="button" class="btn btn-outline"
-                                onclick="document.getElementById('wr_file').click()">Upload</button>
+                        <div class="form-group">
+                            <label>Role / Position *</label>
+                            <input type="text" id="e_role" required placeholder="Software Engineer">
                         </div>
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Manuscript / Body</label>
-                        <textarea id="wr_content" rows="10" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Tags</label>
-                        <input type="text" id="wr_category" placeholder="Tutorial, Engineering">
-                    </div>
-                    <div class="full-width" style="text-align: right;">
-                        <button type="submit" class="btn btn-primary">Publish Entry</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        </div>
-        <!-- Achievement Section -->
-        <div id="section-achievements" class="section">
-            <header>
-                <h1>Achievements & Awards</h1>
-                <p>Highlight your honors, certifications, and milestones.</p>
-            </header>
-
-            <div class="item-list" id="achievementList">
-                <!-- Loaded via JS -->
-            </div>
-
-            <div class="card" style="margin-top: 2rem;">
-                <h3>Add New Achievement</h3>
-                <form id="achievementForm" class="form-grid" style="margin-top: 1.5rem;">
-                    <div class="form-group full-width">
-                        <label>Title</label>
-                        <input type="text" id="ach_title" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Date / Year</label>
-                        <input type="text" id="ach_date" placeholder="2024">
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Description</label>
-                        <textarea id="ach_desc" rows="3"></textarea>
-                    </div>
-                    <div class="full-width" style="text-align: right;">
-                        <button type="submit" class="btn btn-primary">Add Achievement</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Photos Section -->
-        <div id="section-photos" class="section">
-            <header>
-                <h1>Photo Gallery</h1>
-                <p>Curate images for your portfolio gallery.</p>
-            </header>
-
-            <div class="item-list"
-                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;"
-                id="photoList">
-                <!-- Loaded via JS -->
-            </div>
-
-            <div class="card" style="margin-top: 2rem;">
-                <h3>Upload New Photo</h3>
-                <form id="photoForm" class="form-grid" style="margin-top: 1.5rem;">
-                    <div class="form-group full-width">
-                        <label>Photo</label>
-                        <div class="upload-area">
-                            <div class="upload-preview" id="ph_image_preview">
-                                <img src="" alt="" style="display:none">
-                                <span style="font-size: 10px; color: var(--text-slate)">No Preview</span>
-                            </div>
-                            <input type="text" id="ph_image" placeholder="Image URL" required>
-                            <input type="file" id="ph_file" style="display:none" onchange="uploadFile('ph')">
-                            <button type="button" class="btn btn-outline"
-                                onclick="document.getElementById('ph_file').click()">Upload</button>
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <input type="text" id="e_start" placeholder="Jan 2024">
                         </div>
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Caption (Optional)</label>
-                        <input type="text" id="ph_caption">
-                    </div>
-                    <div class="full-width" style="text-align: right;">
-                        <button type="submit" class="btn btn-primary">Add Photo</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Videos Section -->
-        <div id="section-videos" class="section">
-            <header>
-                <h1>Video Gallery</h1>
-                <p>Manage your featured YouTube videos.</p>
-            </header>
-
-            <div class="item-list" id="videoList">
-                <!-- Loaded via JS -->
+                        <div class="form-group">
+                            <label>End Date</label>
+                            <input type="text" id="e_end" placeholder="Present">
+                        </div>
+                        <div class="form-group fg-full">
+                            <label>Responsibilities / Description</label>
+                            <textarea id="e_desc" rows="4" placeholder="What did you do here?"></textarea>
+                        </div>
+                        <div class="form-group fg-full">
+                            <label>Technologies Used</label>
+                            <input type="text" id="e_tech" placeholder="Go, Kubernetes, AWS...">
+                        </div>
+                        <div class="form-actions fg-full">
+                            <button type="button" class="btn btn-outline"
+                                onclick="resetForm('experienceForm','e_id')">Clear</button>
+                            <button type="submit" class="btn btn-primary">Save Experience</button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
-            <div class="card" style="margin-top: 2rem;">
-                <h3>Embed New Video</h3>
-                <form id="videoForm" class="form-grid" style="margin-top: 1.5rem;">
-                    <div class="form-group full-width">
-                        <label>Video Title</label>
-                        <input type="text" id="vid_title" required>
-                    </div>
-                    <div class="form-group full-width">
-                        <label>YouTube Link (URL or ID)</label>
-                        <input type="text" id="vid_link" placeholder="https://www.youtube.com/watch?v=..." required>
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Description</label>
-                        <textarea id="vid_desc" rows="2"></textarea>
-                    </div>
-                    <div class="full-width" style="text-align: right;">
-                        <button type="submit" class="btn btn-primary">Add Video</button>
-                    </div>
-                </form>
+            <!-- WRITING / BLOG -->
+            <div id="sec-writing" class="section">
+                <div id="writingList" class="item-list"></div>
+                <div class="card">
+                    <div class="card-title">✍️ New Blog Post</div>
+                    <form class="form-grid" id="writingForm">
+                        <input type="hidden" id="wr_id">
+                        <div class="form-group fg-full">
+                            <label>Title *</label>
+                            <input type="text" id="wr_title" required placeholder="How I built...">
+                        </div>
+                        <div class="form-group fg-full">
+                            <label>Cover Image URL</label>
+                            <input type="url" id="wr_image" placeholder="https://..."
+                                oninput="previewImg('wr_image','wr_img_preview')">
+                            <img id="wr_img_preview" class="upload-preview" style="margin-top:8px;display:none;">
+                        </div>
+                        <div class="form-group fg-full">
+                            <label>Content / Body *</label>
+                            <textarea id="wr_content" rows="12" required
+                                placeholder="Write your article here..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Category / Tags</label>
+                            <input type="text" id="wr_category" placeholder="Tutorial, Engineering...">
+                        </div>
+                        <div class="form-actions fg-full">
+                            <button type="button" class="btn btn-outline"
+                                onclick="resetForm('writingForm','wr_id')">Clear</button>
+                            <button type="submit" class="btn btn-primary">Publish Post</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
 
-    </main>
+            <!-- ACHIEVEMENTS -->
+            <div id="sec-achievements" class="section">
+                <div id="achievementList" class="item-list"></div>
+                <div class="card">
+                    <div class="card-title">🏆 Add Achievement</div>
+                    <form class="form-grid" id="achievementForm">
+                        <input type="hidden" id="ach_id">
+                        <div class="form-group fg-full">
+                            <label>Title *</label>
+                            <input type="text" id="ach_title" required placeholder="Best Developer Award 2024">
+                        </div>
+                        <div class="form-group">
+                            <label>Date / Year</label>
+                            <input type="text" id="ach_date" placeholder="Dec 2024">
+                        </div>
+                        <div class="form-group fg-full">
+                            <label>Description</label>
+                            <textarea id="ach_desc" rows="3" placeholder="What did you achieve?"></textarea>
+                        </div>
+                        <div class="form-actions fg-full">
+                            <button type="button" class="btn btn-outline"
+                                onclick="resetForm('achievementForm','ach_id')">Clear</button>
+                            <button type="submit" class="btn btn-primary">Add Achievement</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-    <div id="toast">Changes synchronized successfully!</div>
+            <!-- PHOTOS -->
+            <div id="sec-photos" class="section">
+                <div id="photoGrid" class="photo-grid"></div>
+                <div class="card">
+                    <div class="card-title">📷 Upload Photo</div>
+                    <form class="form-grid" id="photoForm">
+                        <div class="form-group fg-full">
+                            <label>Image URL</label>
+                            <input type="url" id="ph_image" placeholder="https://...">
+                        </div>
+                        <div class="form-group fg-full">
+                            <label>Caption</label>
+                            <input type="text" id="ph_caption" placeholder="Photo description">
+                        </div>
+                        <div class="form-actions fg-full">
+                            <button type="submit" class="btn btn-primary">Add Photo</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- VIDEOS -->
+            <div id="sec-videos" class="section">
+                <div id="videoList" class="item-list"></div>
+                <div class="card">
+                    <div class="card-title">🎬 Add Video</div>
+                    <form class="form-grid" id="videoForm">
+                        <input type="hidden" id="vd_id">
+                        <div class="form-group fg-full">
+                            <label>Title *</label>
+                            <input type="text" id="vd_title" required placeholder="Video Title">
+                        </div>
+                        <div class="form-group fg-full">
+                            <label>YouTube URL *</label>
+                            <input type="url" id="vd_youtube" required placeholder="https://youtube.com/watch?v=...">
+                        </div>
+                        <div class="form-group fg-full">
+                            <label>Description</label>
+                            <textarea id="vd_desc" rows="3" placeholder="What is this video about?"></textarea>
+                        </div>
+                        <div class="form-actions fg-full">
+                            <button type="button" class="btn btn-outline"
+                                onclick="resetForm('videoForm','vd_id')">Clear</button>
+                            <button type="submit" class="btn btn-primary">Save Video</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div><!-- /content -->
+    </div><!-- /main -->
+
+    <div id="toast"></div>
 
     <script>
-        const API = '/api';
+        const TOKEN = localStorage.getItem('token');
+        const AUTH = { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' };
 
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-            document.getElementById('section-' + id).classList.add('active');
+        // ── Navigation ──
+        const sectionMeta = {
+            dashboard: { title: 'Dashboard', sub: 'Overview of your content' },
+            profile: { title: 'Profile', sub: 'Manage your personal information' },
+            projects: { title: 'Projects', sub: 'Manage your portfolio projects' },
+            experience: { title: 'Experience', sub: 'Manage your work history' },
+            writing: { title: 'Blog / Writing', sub: 'Manage your articles and posts' },
+            achievements: { title: 'Achievements', sub: 'Awards, certifications and milestones' },
+            photos: { title: 'Photo Gallery', sub: 'Manage your photos' },
+            videos: { title: 'Videos', sub: 'Manage your video content' },
+        };
 
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-
-            if (id === 'profile') { loadProfile(); loadNavItems(); }
-            if (id === 'experience') loadExperience();
-            if (id === 'projects') loadProjects();
-            if (id === 'writing') loadWriting();
-            if (id === 'achievements') loadAchievements();
-            if (id === 'photos') loadPhotos();
-            if (id === 'videos') loadVideos();
+        function nav(el, section) {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('sec-' + section).classList.add('active');
+            document.getElementById('topbarTitle').textContent = sectionMeta[section].title;
+            document.getElementById('topbarSub').textContent = sectionMeta[section].sub;
+            if (section === 'dashboard') loadDashboard();
+            if (section === 'projects') loadProjects();
+            if (section === 'experience') loadExperience();
+            if (section === 'writing') loadWriting();
+            if (section === 'achievements') loadAchievements();
+            if (section === 'photos') loadPhotos();
+            if (section === 'videos') loadVideos();
+            if (section === 'profile') loadProfile();
         }
 
-        function toast(msg) {
+        // ── Toast ──
+        function toast(msg, type = 'info') {
             const t = document.getElementById('toast');
             t.textContent = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
+            t.className = 'show ' + type;
+            clearTimeout(t._t);
+            t._t = setTimeout(() => t.className = '', 3000);
         }
 
-        async function uploadFile(prefix) {
-            const fileInput = document.getElementById(prefix + '_file');
-            if (!fileInput.files[0]) return;
+        // ── Logout ──
+        function logout() { localStorage.removeItem('token'); window.location.href = '/login'; }
 
-            const formData = new FormData();
-            formData.append('image', fileInput.files[0]);
+        // ── Image Preview ──
+        function previewImg(inputId, previewId) {
+            const url = document.getElementById(inputId).value;
+            const img = document.getElementById(previewId);
+            img.style.display = url ? 'block' : 'none';
+            img.src = url;
+        }
 
+        // ── Generic reset ──
+        function resetForm(formId, idField) {
+            document.getElementById(formId).reset();
+            if (idField) document.getElementById(idField).value = '';
+        }
+
+        // ── API Helper ──
+        async function api(method, url, body) {
+            const opts = { method, headers: AUTH };
+            if (body) opts.body = JSON.stringify(body);
+            const res = await fetch(url, opts);
+            if (!res.ok) throw new Error(await res.text());
+            return res.json();
+        }
+
+        // ────────────────────────────────────────────────
+        // DASHBOARD
+        // ────────────────────────────────────────────────
+        async function loadDashboard() {
             try {
-                const res = await fetch(`${API}/upload-image`, {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
-                    body: formData
-                });
-                const data = await res.json();
-                if (data.url) {
-                    document.getElementById(prefix + '_image').value = data.url;
-                    // Update preview
-                    const preview = document.getElementById(prefix + '_image_preview');
-                    preview.querySelector('img').src = data.url;
-                    preview.querySelector('img').style.display = 'block';
-                    preview.querySelector('span').style.display = 'none';
-                    toast('Image processed successfully!');
-                }
-            } catch (e) { toast('Upload failed'); }
+                const [projects, experiences, writings, achievements] = await Promise.all([
+                    fetch('/api/projects').then(r => r.json()).catch(() => []),
+                    fetch('/api/experience').then(r => r.json()).catch(() => []),
+                    fetch('/api/projects?limit=100').then(r => r.json()).catch(() => []),
+                    fetch('/api/achievements').then(r => r.json()).catch(() => []),
+                ]);
+                document.getElementById('statProjects').textContent = (projects || []).length;
+                document.getElementById('statExp').textContent = (experiences || []).length;
+                document.getElementById('statWriting').textContent = (writings || []).length;
+                document.getElementById('statAch').textContent = (achievements || []).length;
+
+                const dp = document.getElementById('dashProjects');
+                if (!projects || !projects.length) { dp.innerHTML = '<div class="empty"><span>🚀</span><p>No projects yet</p></div>'; return; }
+                dp.innerHTML = projects.slice(0, 5).map(p => `
+            <div class="list-item">
+                <div class="list-item-body"><h4>${p.title}</h4><p>${p.summary || p.category || ''}</p></div>
+                <span class="badge badge-${p.featured ? 'yellow' : 'blue'}">${p.featured ? '⭐ Featured' : 'Active'}</span>
+            </div>`).join('');
+            } catch (e) { console.error(e); }
         }
 
-        // --- Profile Logic ---
+        // ────────────────────────────────────────────────
+        // PROFILE
+        // ────────────────────────────────────────────────
         async function loadProfile() {
-            const res = await fetch(`${API}/profile`);
-            const d = await res.json();
-            if (d.name) {
-                document.getElementById('p_name').value = d.name;
-                document.getElementById('p_headline').value = d.headline;
-                document.getElementById('p_bio').value = d.bio;
-                document.getElementById('p_about').value = d.about;
-                document.getElementById('p_image').value = d.image;
-                document.getElementById('p_resume').value = d.resume;
-                document.getElementById('p_linkedin').value = d.linkedin;
-                document.getElementById('p_linkedin').value = d.linkedin;
-                document.getElementById('p_github').value = d.github;
-                document.getElementById('p_instagram').value = d.instagram || '';
-                document.getElementById('p_twitter').value = d.twitter || '';
-                document.getElementById('p_facebook').value = d.facebook || '';
-                document.getElementById('p_youtube').value = d.youtube || '';
+            try {
+                const d = await fetch('/api/profile').then(r => r.json());
+                if (!d) return;
+                document.getElementById('p_name').value = d.name || '';
+                document.getElementById('p_headline').value = d.headline || '';
+                document.getElementById('p_bio').value = d.bio || '';
+                document.getElementById('p_about').value = d.about || '';
                 document.getElementById('p_skills').value = d.skills || '';
                 document.getElementById('p_email').value = d.email || '';
-
-                if (d.image) {
-                    const preview = document.getElementById('p_image_preview');
-                    preview.querySelector('img').src = d.image;
-                    preview.querySelector('img').style.display = 'block';
-                    preview.querySelector('span').style.display = 'none';
-                }
-            }
+                document.getElementById('p_resume').value = d.resume || '';
+                document.getElementById('p_github').value = d.github || '';
+                document.getElementById('p_linkedin').value = d.linkedin || '';
+                document.getElementById('p_twitter').value = d.twitter || '';
+                document.getElementById('p_instagram').value = d.instagram || '';
+                document.getElementById('p_facebook').value = d.facebook || '';
+                document.getElementById('p_youtube').value = d.youtube || '';
+            } catch (e) { toast('Failed to load profile', 'error'); }
         }
 
-        document.getElementById('profileForm').onsubmit = async (e) => {
+        document.getElementById('profileForm').addEventListener('submit', async e => {
             e.preventDefault();
-            const data = {
-                name: document.getElementById('p_name').value,
-                headline: document.getElementById('p_headline').value,
-                bio: document.getElementById('p_bio').value,
-                about: document.getElementById('p_about').value,
-                image: document.getElementById('p_image').value,
-                resume: document.getElementById('p_resume').value,
-                linkedin: document.getElementById('p_linkedin').value,
-                linkedin: document.getElementById('p_linkedin').value,
-                github: document.getElementById('p_github').value,
-                instagram: document.getElementById('p_instagram').value,
-                twitter: document.getElementById('p_twitter').value,
-                facebook: document.getElementById('p_facebook').value,
-                youtube: document.getElementById('p_youtube').value,
-                skills: document.getElementById('p_skills').value,
-                email: document.getElementById('p_email').value,
-            };
-            await fetch(`${API}/profile`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
-                },
-                body: JSON.stringify(data)
-            });
-
-            // Save navigation items
-            await saveMainNavItems();
-
-            toast('Identity Synchronized!');
-        };
-
-
-        // --- Nav Items Logic ---
-        async function loadNavItems() {
-            const res = await fetch(`${API}/nav-items`);
-            const data = await res.json();
-
-            // Sort by order
-            data.sort((a, b) => a.order - b.order);
-
-            // Load first 4 into inputs
-            for (let i = 0; i < 4; i++) {
-                const input = document.getElementById(`nav_${i + 1}_label`);
-                if (input && data[i]) {
-                    input.value = data[i].label || '';
-                    input.dataset.id = data[i].ID;
-                    input.dataset.link = data[i].link;
-                }
-            }
-        }
-
-        async function saveMainNavItems() {
-            // Save first 4 items
-            for (let i = 0; i < 4; i++) {
-                const input = document.getElementById(`nav_${i + 1}_label`);
-                if (input && input.dataset.id) {
-                    const data = {
-                        label: input.value,
-                        link: input.dataset.link,
-                        order: i + 1
-                    };
-                    await fetch(`${API}/nav-items/${input.dataset.id}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + localStorage.getItem('token')
-                        },
-                        body: JSON.stringify(data)
-                    });
-                }
-            }
-        }
-
-        function showAddNavModal() {
-            const newLabel = prompt('নতুন মেনু আইটেমের নাম লিখুন (যেমন: Blog, Services):');
-            if (!newLabel) return;
-
-            const newLink = prompt('লিঙ্ক লিখুন (যেমন: #blog বা https://...):');
-            if (!newLink) return;
-
-            addNewNavItem(newLabel, newLink);
-        }
-
-        async function addNewNavItem(label, link) {
-            // Find next order
-            const res = await fetch(`${API}/nav-items`);
-            const all = await res.json();
-            const maxOrder = Math.max(...all.map(item => item.order), 4);
-
-            const data = {
-                label: label,
-                link: link,
-                order: maxOrder + 1
-            };
-
-            await fetch(`${API}/nav-items`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
-                },
-                body: JSON.stringify(data)
-            });
-
-            toast('নতুন মেনু আইটেম যোগ হয়েছে!');
-            loadNavItems();
-        }
-
-        // --- Experience Logic ---
-        let editingExperienceId = null;
-
-        async function loadExperience() {
-            const res = await fetch(`${API}/experience`);
-            const data = await res.json();
-            const list = document.getElementById('experienceList');
-            list.innerHTML = '';
-            data.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'list-item';
-                const itemStr = encodeURIComponent(JSON.stringify(item));
-                div.innerHTML = `
-                    <div class="list-item-info">
-                        <h3>${item.company}</h3>
-                        <p>${item.role} • ${item.start_date} — ${item.end_date}</p>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-outline" onclick="editExperience('${itemStr}')">Edit</button>
-                        <button class="btn btn-danger" onclick="deleteExperience(${item.ID})">Remove</button>
-                    </div>
-                `;
-                list.appendChild(div);
-            });
-        }
-
-        async function editExperience(itemStr) {
-            const item = JSON.parse(decodeURIComponent(itemStr));
-            editingExperienceId = item.ID;
-            document.getElementById('e_company').value = item.company;
-            document.getElementById('e_role').value = item.role;
-            document.getElementById('e_start').value = item.start_date;
-            document.getElementById('e_end').value = item.end_date;
-            document.getElementById('e_desc').value = item.description;
-            document.getElementById('e_tech').value = item.technologies;
-
-            document.querySelector('#experienceForm button[type="submit"]').textContent = 'Update Role';
-            document.getElementById('section-experience').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        async function deleteExperience(id) {
-            if (confirm('Permanently remove this entry?')) {
-                await fetch(`${API}/experience/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            try {
+                await api('POST', '/api/profile', {
+                    name: document.getElementById('p_name').value,
+                    headline: document.getElementById('p_headline').value,
+                    bio: document.getElementById('p_bio').value,
+                    about: document.getElementById('p_about').value,
+                    skills: document.getElementById('p_skills').value,
+                    email: document.getElementById('p_email').value,
+                    resume: document.getElementById('p_resume').value,
+                    github: document.getElementById('p_github').value,
+                    linkedin: document.getElementById('p_linkedin').value,
+                    twitter: document.getElementById('p_twitter').value,
+                    instagram: document.getElementById('p_instagram').value,
+                    facebook: document.getElementById('p_facebook').value,
+                    youtube: document.getElementById('p_youtube').value,
                 });
-                loadExperience();
-                toast('Entry purged');
-            }
-        }
+                toast('Profile saved successfully!', 'success');
+            } catch (e) { toast('Error saving profile', 'error'); }
+        });
 
-        document.getElementById('experienceForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const data = {
-                company: document.getElementById('e_company').value,
-                role: document.getElementById('e_role').value,
-                start_date: document.getElementById('e_start').value,
-                end_date: document.getElementById('e_end').value,
-                description: document.getElementById('e_desc').value,
-                technologies: document.getElementById('e_tech').value,
-            };
-
-            let method = 'POST';
-            let url = `${API}/experience`;
-
-            if (editingExperienceId) {
-                method = 'PUT';
-                url = `${API}/experience/${editingExperienceId}`;
-            }
-
-            await fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
-                },
-                body: JSON.stringify(data)
-            });
-
-            document.getElementById('experienceForm').reset();
-            editingExperienceId = null;
-            document.querySelector('#experienceForm button[type="submit"]').textContent = 'Archive Role';
-            loadExperience();
-            toast(method === 'POST' ? 'New role archived!' : 'Role updated completely!');
-        };
-
-        // --- Projects Logic ---
-        let editingProjectId = null;
-
+        // ────────────────────────────────────────────────
+        // PROJECTS
+        // ────────────────────────────────────────────────
         async function loadProjects() {
-            const res = await fetch(`${API}/projects?limit=50`);
-            const data = await res.json();
             const list = document.getElementById('projectsList');
-            list.innerHTML = '';
-            data.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'list-item';
-                const itemStr = encodeURIComponent(JSON.stringify(item));
-                div.innerHTML = `
-                    <div class="list-item-info">
-                        <h3>${item.title} ${item.featured ? '<span style="color: var(--accent); font-size: 0.8em;">★ Featured</span>' : ''}</h3>
-                        <p>${item.category || 'No tags'}</p>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-outline" onclick="editProject('${itemStr}')">Edit</button>
-                        <button class="btn btn-danger" onclick="deleteProject(${item.ID})">Purge</button>
-                    </div>
-                `;
-                list.appendChild(div);
-            });
+            try {
+                const projects = await fetch('/api/projects?limit=50').then(r => r.json());
+                if (!projects || !projects.length) { list.innerHTML = '<div class="empty"><span>🚀</span><p>No projects yet. Add your first one below!</p></div>'; return; }
+                list.innerHTML = projects.map(p => `
+            <div class="list-item">
+                ${p.image ? `<img class="list-item-img" src="${p.image}" onerror="this.style.display='none'">` : ''}
+                <div class="list-item-body">
+                    <h4>${p.title} ${p.featured ? '⭐' : ''}</h4>
+                    <p>${p.category || ''} ${p.summary ? '· ' + p.summary.substring(0, 50) : ''}...</p>
+                </div>
+                <div class="list-item-actions">
+                    <button class="btn btn-sm btn-outline" onclick="editProject(${p.id})">✏️ Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteProject(${p.id})">🗑️</button>
+                </div>
+            </div>`).join('');
+                window._projects = projects;
+            } catch (e) { list.innerHTML = '<div class="empty"><span>⚠️</span><p>Could not load projects</p></div>'; }
         }
 
-        async function editProject(itemStr) {
-            const item = JSON.parse(decodeURIComponent(itemStr));
-            editingProjectId = item.ID;
-            document.getElementById('pr_title').value = item.title;
-            document.getElementById('pr_content').value = item.content || item.summary || '';
-            document.getElementById('pr_category').value = item.category || '';
-            document.getElementById('pr_image').value = item.image || '';
-            document.getElementById('pr_featured').checked = item.featured || false;
-
-            if (item.image) {
-                const preview = document.getElementById('pr_image_preview');
-                preview.querySelector('img').src = item.image;
-                preview.querySelector('img').style.display = 'block';
-                preview.querySelector('span').style.display = 'none';
-            }
-
-            document.querySelector('#projectForm button[type="submit"]').textContent = 'Update Project';
-            document.getElementById('section-projects').scrollIntoView({ behavior: 'smooth' });
+        function editProject(id) {
+            const p = (window._projects || []).find(x => x.id === id); if (!p) return;
+            document.getElementById('pr_id').value = p.id;
+            document.getElementById('pr_title').value = p.title || '';
+            document.getElementById('pr_summary').value = p.summary || '';
+            document.getElementById('pr_content').value = p.content || '';
+            document.getElementById('pr_image').value = p.image || '';
+            document.getElementById('pr_category').value = p.category || '';
+            document.getElementById('pr_order').value = p.order || '';
+            document.getElementById('pr_github').value = p.github_link || '';
+            document.getElementById('pr_live').value = p.live_link || '';
+            document.getElementById('pr_featured').checked = !!p.featured;
+            previewImg('pr_image', 'pr_img_preview');
+            document.getElementById('sec-projects').querySelector('.card-title').textContent = '✏️ Editing: ' + p.title;
+            window.scrollTo({ top: document.getElementById('sec-projects').offsetTop, behavior: 'smooth' });
         }
 
-        async function deleteProject(id) {
-            if (confirm('Delete project data?')) {
-                await fetch(`${API}/projects/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-                });
-                loadProjects();
-                toast('Project purged');
-            }
+        function resetProjectForm() {
+            document.getElementById('projectForm').reset();
+            document.getElementById('pr_id').value = '';
+            document.getElementById('pr_img_preview').style.display = 'none';
+            document.getElementById('sec-projects').querySelector('.card-title').textContent = '➕ Add New Project';
         }
 
-        document.getElementById('projectForm').onsubmit = async (e) => {
+        document.getElementById('projectForm').addEventListener('submit', async e => {
             e.preventDefault();
+            const id = document.getElementById('pr_id').value;
             const data = {
                 title: document.getElementById('pr_title').value,
+                summary: document.getElementById('pr_summary').value,
                 content: document.getElementById('pr_content').value,
-                summary: document.getElementById('pr_content').value.substring(0, 150),
-                category: document.getElementById('pr_category').value,
                 image: document.getElementById('pr_image').value,
+                category: document.getElementById('pr_category').value,
+                order: parseInt(document.getElementById('pr_order').value) || 0,
+                github_link: document.getElementById('pr_github').value,
+                live_link: document.getElementById('pr_live').value,
                 featured: document.getElementById('pr_featured').checked,
-                github_link: "",
-                live_link: "",
-                order: 0
             };
+            try {
+                const url = id ? `/api/projects/${id}` : '/api/projects';
+                const method = id ? 'PUT' : 'POST';
+                await api(method, url, data);
+                toast(id ? 'Project updated!' : 'Project added!', 'success');
+                resetProjectForm();
+                loadProjects();
+            } catch (e) { toast('Error saving project', 'error'); }
+        });
 
-            let method = 'POST';
-            let url = `${API}/projects`;
+        async function deleteProject(id) {
+            if (!confirm('Delete this project permanently?')) return;
+            try {
+                await api('DELETE', `/api/projects/${id}`);
+                toast('Project deleted', 'success');
+                loadProjects();
+            } catch (e) { toast('Error deleting project', 'error'); }
+        }
 
-            if (editingProjectId) {
-                method = 'PUT';
-                url = `${API}/projects/${editingProjectId}`;
-            }
+        // ────────────────────────────────────────────────
+        // EXPERIENCE
+        // ────────────────────────────────────────────────
+        async function loadExperience() {
+            const list = document.getElementById('experienceList');
+            try {
+                const items = await fetch('/api/experience').then(r => r.json());
+                if (!items || !items.length) { list.innerHTML = '<div class="empty"><span>💼</span><p>No experience added yet.</p></div>'; return; }
+                list.innerHTML = items.map(x => `
+            <div class="list-item">
+                <div class="list-item-body">
+                    <h4>${x.role} @ ${x.company}</h4>
+                    <p>${x.start_date || ''} — ${x.end_date || 'Present'} · ${x.technologies || ''}</p>
+                </div>
+                <div class="list-item-actions">
+                    <button class="btn btn-sm btn-outline" onclick="editExp(${x.id})">✏️</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteExp(${x.id})">🗑️</button>
+                </div>
+            </div>`).join('');
+                window._exp = items;
+            } catch (e) { list.innerHTML = '<div class="empty"><span>⚠️</span><p>Could not load</p></div>'; }
+        }
 
-            await fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
-                },
-                body: JSON.stringify(data)
-            });
+        function editExp(id) {
+            const x = (window._exp || []).find(e => e.id === id); if (!x) return;
+            document.getElementById('e_id').value = x.id;
+            document.getElementById('e_company').value = x.company || '';
+            document.getElementById('e_role').value = x.role || '';
+            document.getElementById('e_start').value = x.start_date || '';
+            document.getElementById('e_end').value = x.end_date || '';
+            document.getElementById('e_desc').value = x.description || '';
+            document.getElementById('e_tech').value = x.technologies || '';
+        }
 
-            document.getElementById('projectForm').reset();
-            document.getElementById('pr_image_preview').querySelector('img').style.display = 'none';
-            document.getElementById('pr_image_preview').querySelector('span').style.display = 'block';
-            editingProjectId = null;
-            document.querySelector('#projectForm button[type="submit"]').textContent = 'Deploy Project';
-            loadProjects();
-            toast(method === 'PUT' ? 'Project updated!' : 'Project deployed!');
-        };
+        document.getElementById('experienceForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const id = document.getElementById('e_id').value;
+            const data = { company: document.getElementById('e_company').value, role: document.getElementById('e_role').value, start_date: document.getElementById('e_start').value, end_date: document.getElementById('e_end').value, description: document.getElementById('e_desc').value, technologies: document.getElementById('e_tech').value };
+            try {
+                const url = id ? `/api/experience/${id}` : '/api/experience';
+                const method = id ? 'PUT' : 'POST';
+                await api(method, url, data);
+                toast(id ? 'Experience updated!' : 'Experience added!', 'success');
+                resetForm('experienceForm', 'e_id');
+                loadExperience();
+            } catch (e) { toast('Error saving experience', 'error'); }
+        });
 
+        async function deleteExp(id) {
+            if (!confirm('Delete this experience?')) return;
+            try { await api('DELETE', `/api/experience/${id}`); toast('Deleted', 'success'); loadExperience(); }
+            catch (e) { toast('Error', 'error'); }
+        }
 
-        // --- Writing Logic ---
-        let editingWritingId = null;
-
+        // ────────────────────────────────────────────────
+        // WRITING / BLOG
+        // ────────────────────────────────────────────────
         async function loadWriting() {
-            const res = await fetch(`${API}/articles?limit=50`);
-            const data = await res.json();
             const list = document.getElementById('writingList');
-            list.innerHTML = '';
-            data.forEach(item => {
-                // Heuristic for writing: longer category or specific tag
-                const div = document.createElement('div');
-                const itemStr = encodeURIComponent(JSON.stringify(item));
-                div.className = 'list-item';
-                div.innerHTML = `
-                    <div class="list-item-info">
-                        <h3>${item.title}</h3>
-                        <p>${item.category}</p>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-outline" onclick="editWriting('${itemStr}')">Edit</button>
-                        <button class="btn btn-danger" onclick="deleteWriting(${item.ID})">Remove</button>
-                    </div>
-                `;
-                list.appendChild(div);
-            });
+            list.innerHTML = '<div class="empty"><span>✍️</span><p>Blog posts (coming soon — add via Projects section)</p></div>';
         }
 
-        async function editWriting(itemStr) {
-            const item = JSON.parse(decodeURIComponent(itemStr));
-            editingWritingId = item.id;
-            document.getElementById('wr_title').value = item.title;
-            document.getElementById('wr_content').value = item.content;
-            document.getElementById('wr_category').value = item.category;
-            document.getElementById('wr_image').value = item.image || '';
-
-            if (item.image) {
-                const preview = document.getElementById('wr_image_preview');
-                preview.querySelector('img').src = item.image;
-                preview.querySelector('img').style.display = 'block';
-                preview.querySelector('span').style.display = 'none';
-            }
-
-            document.querySelector('#writingForm button[type="submit"]').textContent = 'Update Entry';
-            document.getElementById('section-writing').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        async function deleteWriting(id) {
-            if (confirm('Delete journal entry?')) {
-                await fetch(`${API}/delete-article`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `id=${id}`
-                });
-                loadWriting();
-                toast('Entry removed');
-            }
-        }
-
-        document.getElementById('writingForm').onsubmit = async (e) => {
+        document.getElementById('writingForm').addEventListener('submit', async e => {
             e.preventDefault();
-            const data = {
-                title: document.getElementById('wr_title').value,
-                content: document.getElementById('wr_content').value,
-                category: document.getElementById('wr_category').value,
-                image: document.getElementById('wr_image').value,
-                author: "Jaber Systems"
-            };
+            // Use projects endpoint for blog posts
+            const data = { title: document.getElementById('wr_title').value, content: document.getElementById('wr_content').value, image: document.getElementById('wr_image').value, category: document.getElementById('wr_category').value, featured: false };
+            try {
+                await api('POST', '/api/projects', data);
+                toast('Post published!', 'success');
+                resetForm('writingForm', 'wr_id');
+            } catch (e) { toast('Error publishing', 'error'); }
+        });
 
-            let url = `${API}/add-article`;
-            if (editingWritingId) {
-                data.id = editingWritingId;
-                url = `${API}/update-article`;
-            }
-
-            await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-
-            document.getElementById('writingForm').reset();
-            document.getElementById('wr_image_preview').querySelector('img').style.display = 'none';
-            document.getElementById('wr_image_preview').querySelector('span').style.display = 'block';
-            editingWritingId = null;
-            document.querySelector('#writingForm button[type="submit"]').textContent = 'Publish Entry';
-            loadWriting();
-            toast(editingWritingId ? 'Entry updated' : 'Entry published');
-        };
-
-        function logout() {
-            document.cookie = 'auth_token=; Max-Age=0; path=/';
-            window.location.href = '/login';
-        }
-
-        // Init
-        loadProfile();
-
-        // --- Achievements Logic ---
+        // ────────────────────────────────────────────────
+        // ACHIEVEMENTS
+        // ────────────────────────────────────────────────
         async function loadAchievements() {
-            const res = await fetch(`${API}/achievements`);
-            const data = await res.json();
             const list = document.getElementById('achievementList');
-            list.innerHTML = data.map(i => `
-                <div class="list-item">
-                    <div class="list-item-info">
-                        <h3>${i.title} <span style="font-size: 0.8em; color: var(--accent); margin-left:8px;">${i.date}</span></h3>
-                        <p>${i.description}</p>
-                    </div>
-                    <button class="btn btn-danger" onclick="deleteItem('achievements', ${i.ID}, loadAchievements)">Delete</button>
+            try {
+                const items = await fetch('/api/achievements').then(r => r.json());
+                if (!items || !items.length) { list.innerHTML = '<div class="empty"><span>🏆</span><p>No achievements yet.</p></div>'; return; }
+                list.innerHTML = items.map(a => `
+            <div class="list-item">
+                <div class="list-item-body"><h4>${a.title}</h4><p>${a.date || ''} ${a.description ? '· ' + a.description.substring(0, 60) + '...' : ''}</p></div>
+                <div class="list-item-actions">
+                    <button class="btn btn-sm btn-danger" onclick="deleteAch(${a.id})">🗑️</button>
                 </div>
-            `).join('');
+            </div>`).join('');
+            } catch (e) { list.innerHTML = '<div class="empty"><span>⚠️</span><p>Could not load</p></div>'; }
         }
 
-        document.getElementById('achievementForm').onsubmit = async (e) => {
+        document.getElementById('achievementForm').addEventListener('submit', async e => {
             e.preventDefault();
-            const data = {
-                title: document.getElementById('ach_title').value,
-                date: document.getElementById('ach_date').value,
-                description: document.getElementById('ach_desc').value
-            };
-            await fetch(`${API}/achievements`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
-                },
-                body: JSON.stringify(data)
-            });
-            e.target.reset();
-            loadAchievements();
-            toast('Achievement Added!');
-        };
+            const data = { title: document.getElementById('ach_title').value, date: document.getElementById('ach_date').value, description: document.getElementById('ach_desc').value };
+            try {
+                await api('POST', '/api/achievements', data);
+                toast('Achievement added!', 'success');
+                resetForm('achievementForm', 'ach_id');
+                loadAchievements();
+            } catch (e) { toast('Error', 'error'); }
+        });
 
-        // --- Photos Logic ---
+        async function deleteAch(id) {
+            if (!confirm('Delete?')) return;
+            try { await api('DELETE', `/api/achievements/${id}`); toast('Deleted', 'success'); loadAchievements(); }
+            catch (e) { toast('Error', 'error'); }
+        }
+
+        // ────────────────────────────────────────────────
+        // PHOTOS
+        // ────────────────────────────────────────────────
         async function loadPhotos() {
-            const res = await fetch(`${API}/photos`);
-            const data = await res.json();
-            const list = document.getElementById('photoList');
-            list.innerHTML = data.map(i => `
-                <div class="card" style="margin:0; padding: 10px; position: relative;">
-                    <img src="${i.image}" style="width:100%; height: 150px; object-fit: cover; border-radius: 8px;">
-                    <p style="margin-top: 8px; font-size: 0.9em; color: var(--text-slate)">${i.caption || 'No Caption'}</p>
-                    <button class="btn btn-danger" style="position: absolute; top: 5px; right: 5px; padding: 4px 8px; font-size: 0.7rem;" 
-                        onclick="deleteItem('photos', ${i.ID}, loadPhotos)">X</button>
+            const grid = document.getElementById('photoGrid');
+            try {
+                const photos = await fetch('/api/photos').then(r => r.json());
+                if (!photos || !photos.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><span>🖼️</span><p>No photos yet.</p></div>'; return; }
+                grid.innerHTML = photos.map(ph => `
+            <div class="photo-item">
+                <img src="${ph.image}" alt="${ph.caption || ''}" loading="lazy">
+                <div class="photo-overlay">
+                    <button class="btn btn-sm btn-danger" onclick="deletePhoto(${ph.id})">🗑️</button>
                 </div>
-            `).join('');
+            </div>`).join('');
+            } catch (e) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><span>⚠️</span><p>Could not load</p></div>'; }
         }
 
-        document.getElementById('photoForm').onsubmit = async (e) => {
+        document.getElementById('photoForm').addEventListener('submit', async e => {
             e.preventDefault();
-            const data = {
-                image: document.getElementById('ph_image').value,
-                caption: document.getElementById('ph_caption').value
-            };
-            await fetch(`${API}/photos`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
-                },
-                body: JSON.stringify(data)
-            });
-            e.target.reset();
-            document.getElementById('ph_image_preview').querySelector('img').style.display = 'none';
-            document.getElementById('ph_image_preview').querySelector('span').style.display = 'block';
-            loadPhotos();
-            toast('Photo Added!');
-        };
+            const data = { image: document.getElementById('ph_image').value, caption: document.getElementById('ph_caption').value };
+            try { await api('POST', '/api/photos', data); toast('Photo added!', 'success'); e.target.reset(); loadPhotos(); }
+            catch (err) { toast('Error', 'error'); }
+        });
 
-        // --- Videos Logic ---
+        async function deletePhoto(id) {
+            if (!confirm('Delete?')) return;
+            try { await api('DELETE', `/api/photos/${id}`); toast('Deleted', 'success'); loadPhotos(); }
+            catch (e) { toast('Error', 'error'); }
+        }
+
+        // ────────────────────────────────────────────────
+        // VIDEOS
+        // ────────────────────────────────────────────────
         async function loadVideos() {
-            const res = await fetch(`${API}/videos`);
-            const data = await res.json();
             const list = document.getElementById('videoList');
-            list.innerHTML = data.map(i => `
-                <div class="list-item">
-                    <div class="list-item-info">
-                        <h3>${i.title}</h3>
-                        <p><a href="${i.youtube_link}" target="_blank" style="color: var(--accent)">Watch Video</a></p>
-                        <p>${i.description}</p>
-                    </div>
-                    <button class="btn btn-danger" onclick="deleteItem('videos', ${i.ID}, loadVideos)">Delete</button>
+            try {
+                const videos = await fetch('/api/videos').then(r => r.json());
+                if (!videos || !videos.length) { list.innerHTML = '<div class="empty"><span>🎬</span><p>No videos yet.</p></div>'; return; }
+                list.innerHTML = videos.map(v => `
+            <div class="list-item">
+                <div class="list-item-body"><h4>${v.title}</h4><p>${v.youtube_link || ''}</p></div>
+                <div class="list-item-actions">
+                    <button class="btn btn-sm btn-danger" onclick="deleteVideo(${v.id})">🗑️</button>
                 </div>
-            `).join('');
+            </div>`).join('');
+            } catch (e) { list.innerHTML = '<div class="empty"><span>⚠️</span><p>Could not load</p></div>'; }
         }
 
-        document.getElementById('videoForm').onsubmit = async (e) => {
+        document.getElementById('videoForm').addEventListener('submit', async e => {
             e.preventDefault();
-            const data = {
-                title: document.getElementById('vid_title').value,
-                youtube_link: document.getElementById('vid_link').value,
-                description: document.getElementById('vid_desc').value
-            };
-            await fetch(`${API}/videos`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
-                },
-                body: JSON.stringify(data)
-            });
-            e.target.reset();
-            loadVideos();
-            toast('Video Added!');
-        };
+            const data = { title: document.getElementById('vd_title').value, youtube_link: document.getElementById('vd_youtube').value, description: document.getElementById('vd_desc').value };
+            try { await api('POST', '/api/videos', data); toast('Video added!', 'success'); resetForm('videoForm', 'vd_id'); loadVideos(); }
+            catch (err) { toast('Error', 'error'); }
+        });
 
-        // Generic Delete Helper
-        async function deleteItem(endpoint, id, reloadFunc) {
-            if (!confirm('Are you sure?')) return;
-            await fetch(`${API}/${endpoint}/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-            });
-            reloadFunc();
-            toast('Deleted Successfully');
+        async function deleteVideo(id) {
+            if (!confirm('Delete?')) return;
+            try { await api('DELETE', `/api/videos/${id}`); toast('Deleted', 'success'); loadVideos(); }
+            catch (e) { toast('Error', 'error'); }
         }
+
+        // ── Init ──
+        loadDashboard();
+        loadProfile();
     </script>
 </body>
 
