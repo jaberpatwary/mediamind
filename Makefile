@@ -2,7 +2,7 @@ include .env
 # export $(shell sed 's/=.*//' .env) # Linux specific, causing errors on Windows
 
 start:
-	go run src/main.go
+	powershell -ExecutionPolicy Bypass -File .\start.ps1
 lint:
 	@golangci-lint run
 tests:
