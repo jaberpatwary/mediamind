@@ -1,8 +1,9 @@
-include .env
+# include .env
 # export $(shell sed 's/=.*//' .env) # Linux specific, causing errors on Windows
 
 start:
-	powershell -ExecutionPolicy Bypass -File .\start.ps1
+	@fuser -k 1111/tcp 2>/dev/null || true
+	@go run src/main.go
 lint:
 	@golangci-lint run
 tests:
